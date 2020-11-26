@@ -1,0 +1,22 @@
+#token加密密钥
+token:
+  secret: "token_photoshare"
+#mssql数据库配置
+mssql:
+  server: "112.74.48.21"
+  port: 63354
+  user: "sa"
+  password: "Lkl888888"
+  database: "photoshare"
+
+#redis配置
+redis:
+  user:
+    address: "127.0.0.1:6379"
+    dbnum: 0
+    password: ""
+  sms:
+    address: "127.0.0.1:6379"
+    dbnum: 1
+    password: ""
+

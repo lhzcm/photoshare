@@ -1,0 +1,5 @@
+{
+    "go.docsTool": "guru",
+    "go.useLanguageServer": true,
+    "rest-client.rememberCookiesForSubsequentRequests": false,
+}

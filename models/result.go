@@ -28,8 +28,9 @@ func Fail(msg string) Result {
 	}
 }
 
-func Nologin() Result {
+func Nologin(msg string) Result {
 	return Result{
 		Code: noLogin,
+		Msg:  msg,
 	}
 }

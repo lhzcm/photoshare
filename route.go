@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	. "lkl.photoshare/apis"
+	. "photoshare/apis"
 )
 
 func initRouter() *gin.Engine {

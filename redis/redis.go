@@ -8,7 +8,8 @@ import (
 	"strconv"
 	"time"
 
-	"lkl.photoshare/models"
+	"photoshare/config"
+	"photoshare/models"
 
 	"github.com/go-redis/redis/v8"
 )
@@ -28,15 +29,19 @@ var userRDB, smsRDB *redis.Client
 var ctx = context.Background()
 
 func init() {
+	//用户信息redis库
+	dbconfig := config.Configs.Redis.User
 	userRDB = redis.NewClient(&redis.Options{
-		Addr:     address,
-		Password: password,
-		DB:       0,
+		Addr:     dbconfig.Address,
+		Password: dbconfig.Password,
+		DB:       dbconfig.Dbnum,
 	})
+	//短信redis库
+	dbconfig = config.Configs.Redis.SMS
 	smsRDB = redis.NewClient(&redis.Options{
-		Addr:     address,
-		Password: password,
-		DB:       2,
+		Addr:     dbconfig.Address,
+		Password: dbconfig.Password,
+		DB:       dbconfig.Dbnum,
 	})
 
 	if err := userRDB.Ping(ctx).Err(); err != nil {
@@ -74,7 +79,7 @@ func Redisgetuser(Id int32) (user models.User, err error) {
 	user.Updatetime = time.Unix(int64(timestamp), 0)
 	timestamp, _ = strconv.Atoi(val["Writetime"])
 	user.Writetime = time.Unix(int64(timestamp), 0)
-	user.Cookie = val["Cookie"]
+	user.Token = val["Token"]
 	return
 }
 
@@ -90,11 +95,20 @@ func Redissetuser(user models.User) (err error) {
 		"Password", user.Password,
 		"Updatetime", user.Updatetime.Unix(),
 		"Writetime", user.Writetime.Unix(),
-		"Cookie", user.Cookie).Err()
+		"Token", user.Token).Err()
 	if err != nil {
 		return
 	}
 	hours := rand.Intn(5000) + 5000
 	err = userRDB.Expire(ctx, strconv.Itoa(int(user.Id)), time.Duration(hours)*time.Hour).Err()
+	return
+}
+
+func RedissetToken(id int32, token string) (err error) {
+	err = userRDB.HMSet(ctx, strconv.FormatInt(int64(id), 10),
+		"Token", token).Err()
+	if err != nil {
+		return
+	}
 	return
 }

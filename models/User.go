@@ -2,29 +2,44 @@ package models
 
 import (
 	"database/sql"
+	db "photoshare/database"
 	"time"
-
-	db "lkl.photoshare/database"
 )
 
 type User struct {
-	Id         int32
-	Name       string
-	Headimg    string
-	Phone      string
-	City       int32
-	Brithday   time.Time
-	Ismale     bool
-	Password   string
-	Updatetime time.Time
-	Writetime  time.Time
-	Cookie     string
+	Id         int32     `gorm:"primary_key;AUTO_INCREMENT" json:"Id,string"`
+	Name       string    `gorm:"not null"`
+	Headimg    string    `gorm:"not null"`
+	Phone      string    `gorm:"not null;type:char(11)"`
+	City       int32     `gorm:"not null"`
+	Brithday   time.Time `gorm:"not null;type:date"`
+	Ismale     bool      `gorm:"not null"`
+	Password   string    `gorm:"not null"`
+	Updatetime time.Time `gorm:"not null;type:datetime"`
+	Writetime  time.Time `gorm:"not null;type:datetime"`
+	Token      string    `gorm:"not null;type:varchar(128)"`
+}
+
+func init() {
+	if hasTable := db.GormDB.HasTable(&User{}); !hasTable {
+		db.GormDB.Create(&User{})
+	}
+}
+
+//定义表名
+func (User) TableName() string {
+	return "t_users"
 }
 
 //通过id获取用户数据
+// func (u *User) GetFirst() (err error) {
+// 	err = db.SqlDB.QueryRow("select id, name, headimg, city, brithday, ismale, password, updatetime, writetime from t_users where id = @id", sql.Named("id", u.Id)).Scan(&u.Id,
+// 		&u.Name, &u.Headimg, &u.City, &u.Brithday, &u.Ismale, &u.Password, &u.Updatetime, &u.Writetime)
+// 	return
+// }
+
 func (u *User) GetFirst() (err error) {
-	err = db.SqlDB.QueryRow("select id, name, headimg, city, brithday, ismale, password, updatetime, writetime from t_users where id = @id", sql.Named("id", u.Id)).Scan(&u.Id,
-		&u.Name, &u.Headimg, &u.City, &u.Brithday, &u.Ismale, &u.Password, &u.Updatetime, &u.Writetime)
+	db.GormDB.First(u)
 	return
 }
 

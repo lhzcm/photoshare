@@ -1,0 +1,31 @@
+POST http://localhost:8080/user HTTP/1.1
+Content-Type: application/json
+Cookie: token=1023-5ca282a436d0c87e532fbc9a3e8e737f-1608653320
+
+{
+    "Name" : "王五",
+    "Headimg" : "",
+    "Phone" : "17854276259",
+    "City" : 0,
+    "Brithday" : "2020-11-11T00:00:00Z",
+    "Ismale" : true,
+    "Password" : "test123"
+}
+
+###
+
+POST http://localhost:8080/user/login HTTP/1.1
+
+{
+    "Id" : "1023",
+    "Password" : "test123"
+}
+
+###
+
+GET http://localhost:8080/user/info HTTP/1.1
+Cookie: token=1023-fffffac108574ededae36bc5fc1d6885-1608824850
+
+
+###
+GET http://localhost:8080/test HTTP/1.1

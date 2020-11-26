@@ -1,7 +1,7 @@
 package main
 
 import (
-	db "lkl.photoshare/database"
+	db "photoshare/database"
 )
 
 func main() {

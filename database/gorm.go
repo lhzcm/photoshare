@@ -1,29 +1,24 @@
 package database
 
 import (
-	"context"
-	"database/sql"
 	"fmt"
+	"log"
 	"photoshare/config"
 
-	_ "github.com/denisenkom/go-mssqldb"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mssql"
 )
 
-var SqlDB *sql.DB
+var GormDB *gorm.DB
 
 func init() {
-	var err error
 	var conn config.MssqlConfig = config.Configs.Mssql
 	connStr := fmt.Sprintf("server=%s;user id=%s;password=%s;port=%d;database=%s;",
 		conn.Server, conn.User, conn.Password, conn.Port, conn.Database)
-	SqlDB, err = sql.Open("sqlserver", connStr)
+	db, err := gorm.Open("mssql", connStr)
 	if err != nil {
-		panic(err.Error())
+		log.Fatalln(err)
 	}
-
-	ctx := context.Background()
-	err = SqlDB.PingContext(ctx)
-	if err != nil {
-		panic(err.Error())
-	}
+	GormDB = db
+	GormDB.SingularTable(true)
 }
