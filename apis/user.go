@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"photoshare/config"
 	"photoshare/middleware"
 	. "photoshare/models"
 	"photoshare/service"
@@ -16,7 +15,9 @@ import (
 
 //route配置
 func (router *Router) UserRouteRegister() {
-	router.GET("/test", Test)
+	router.GET("/user/code", GetPhoneCode)
+	router.GET("/user/code/:id", PhoneCodeInfo)
+	router.GET("/user/callback", CallBackPhoneCode)
 	router.POST("/user", UserRegister)
 	router.POST("/user/login", UserLogin)
 	router.Use(middleware.UserValidate).GET("/user/info", UserInfo)
@@ -68,22 +69,14 @@ func UserRegister(c *gin.Context) {
 		return
 	}
 
-	exists, err := user.IsPhoneExits()
-	if err != nil {
-		c.JSON(http.StatusOK, Fail("数据请求出错"))
-		log.Println(err)
-		return
-	}
-	if exists {
-		c.JSON(http.StatusOK, Fail("当前手机号码已经注册了"))
-		return
-	}
 	user.Password = utility.EncryptPassword(user.Password)
-	_, err = user.Insert()
-	if err != nil {
-		c.JSON(http.StatusOK, Fail("注册失败，请稍后再试"))
-		log.Println(err)
+
+	if err := service.UserRegister(&user); err != nil {
+		c.JSON(http.StatusOK, Fail(err.Error()))
 		return
+	}
+	if _, token, err := service.UserLogin(user.Id, user.Password); err == nil {
+		c.SetCookie("token", token, 60*24*30, "/", c.Request.URL.Host, false, false)
 	}
 	c.JSON(http.StatusOK, Success(user, "注册成功"))
 }
@@ -106,7 +99,62 @@ func UserLogin(c *gin.Context) {
 	c.JSON(http.StatusOK, Success(user, "登录成功"))
 }
 
-//test
-func Test(c *gin.Context) {
-	c.JSON(http.StatusOK, Success(config.Configs, "成功"))
+//用户注册返回code
+func GetPhoneCode(c *gin.Context) {
+	if code, err := service.CreatePhoneCode(); err == nil {
+		c.JSON(http.StatusOK, Success(code, "成功"))
+		return
+	}
+	c.JSON(http.StatusOK, Fail("系统错误"))
+}
+
+//第三方回调Phone注册码
+func CallBackPhoneCode(c *gin.Context) {
+	phone := c.Query("mobile")
+	result := KeliResult{Version: "1.0"}
+
+	code, err := strconv.ParseInt(c.Query("content"), 10, 32)
+	if err != nil {
+		result.ResultInfo = "返回code码有误"
+		c.XML(http.StatusOK, result)
+		return
+	}
+
+	if len(phone) != 11 {
+		result.ResultInfo = "手机号码有误"
+		c.XML(http.StatusOK, result)
+		return
+	}
+
+	var rowcount int64
+	if rowcount, err = service.UpdatePhoneCode(int32(code), phone); err != nil {
+		result.ResultInfo = err.Error()
+		c.XML(http.StatusOK, result)
+		return
+	}
+	if rowcount <= 0 {
+		result.ResultInfo = "更新失败"
+		c.XML(http.StatusOK, result)
+		return
+	}
+
+	result.Result = 1
+	result.ResultInfo = "注册码发送成功"
+	c.XML(http.StatusOK, result)
+	return
+}
+
+//获取注册码信息
+func PhoneCodeInfo(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusOK, Fail("参数错误"))
+		return
+	}
+	var phonecode PhoneCode
+	if phonecode, err = service.GetPhoneCode(int32(id)); err != nil {
+		c.JSON(http.StatusOK, Fail(err.Error()))
+		return
+	}
+	c.JSON(http.StatusOK, Success(phonecode, "请求成功"))
 }

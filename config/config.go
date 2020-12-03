@@ -7,7 +7,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-const configfile = "./config.yaml"
+const configfile = "config.yaml"
 
 var Configs *Config
 

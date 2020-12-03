@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"photoshare/config"
+	. "photoshare/models"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mssql"
@@ -21,4 +22,6 @@ func init() {
 	}
 	GormDB = db
 	GormDB.SingularTable(true)
+	//自动迁移
+	GormDB.AutoMigrate(&PhoneCode{})
 }
