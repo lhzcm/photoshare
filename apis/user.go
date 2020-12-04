@@ -1,6 +1,7 @@
 package apis
 
 import (
+	"encoding/xml"
 	"log"
 	"net/http"
 	"strconv"
@@ -15,12 +16,13 @@ import (
 
 //route配置
 func (router *Router) UserRouteRegister() {
+	router.Use(gin.Logger())
 	router.GET("/user/code", GetPhoneCode)
 	router.GET("/user/code/:id", PhoneCodeInfo)
 	router.GET("/user/callback", CallBackPhoneCode)
 	router.POST("/user", UserRegister)
 	router.POST("/user/login", UserLogin)
-	router.Use(middleware.UserValidate).GET("/user/info", UserInfo)
+	router.GET("/user/info", middleware.UserValidate, UserInfo)
 }
 
 //获取登录用户信息
@@ -116,31 +118,52 @@ func CallBackPhoneCode(c *gin.Context) {
 	code, err := strconv.ParseInt(c.Query("content"), 10, 32)
 	if err != nil {
 		result.ResultInfo = "返回code码有误"
-		c.XML(http.StatusOK, result)
+		xmlhead := []byte(xml.Header)
+		xmlcontent, _ := xml.MarshalIndent(result, "", "    ")
+		xmlbytes := append(xmlhead, xmlcontent...)
+
+		c.String(http.StatusOK, string(xmlbytes))
 		return
 	}
 
 	if len(phone) != 11 {
 		result.ResultInfo = "手机号码有误"
-		c.XML(http.StatusOK, result)
+		xmlhead := []byte(xml.Header)
+		xmlcontent, _ := xml.MarshalIndent(result, "", "    ")
+		xmlbytes := append(xmlhead, xmlcontent...)
+		//c.XML(http.StatusOK, result)
+		c.String(http.StatusOK, string(xmlbytes))
 		return
 	}
 
 	var rowcount int64
 	if rowcount, err = service.UpdatePhoneCode(int32(code), phone); err != nil {
 		result.ResultInfo = err.Error()
-		c.XML(http.StatusOK, result)
+		xmlhead := []byte(xml.Header)
+		xmlcontent, _ := xml.MarshalIndent(result, "", "    ")
+		xmlbytes := append(xmlhead, xmlcontent...)
+		//c.XML(http.StatusOK, result)
+		c.String(http.StatusOK, string(xmlbytes))
 		return
 	}
 	if rowcount <= 0 {
 		result.ResultInfo = "更新失败"
-		c.XML(http.StatusOK, result)
+		xmlhead := []byte(xml.Header)
+		xmlcontent, _ := xml.MarshalIndent(result, "", "    ")
+		xmlbytes := append(xmlhead, xmlcontent...)
+		//c.XML(http.StatusOK, result)
+		c.String(http.StatusOK, string(xmlbytes))
 		return
 	}
 
 	result.Result = 1
 	result.ResultInfo = "注册码发送成功"
-	c.XML(http.StatusOK, result)
+	xmlhead := []byte(xml.Header)
+	xmlcontent, _ := xml.MarshalIndent(result, "", "    ")
+	xmlbytes := append(xmlhead, xmlcontent...)
+
+	//c.XML(http.StatusOK, result)
+	c.String(http.StatusOK, string(xmlbytes))
 	return
 }
 

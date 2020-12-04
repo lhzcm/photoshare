@@ -1,5 +1,5 @@
-#@host = http://localhost:8080
-@host = http://www.onlinemusic.top
+@host = http://localhost:8080
+#@host = http://www.onlinemusic.top
 
 ###注册接口
 POST {{host}}/user HTTP/1.1
