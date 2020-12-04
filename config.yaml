@@ -12,11 +12,11 @@ mssql:
 #redis配置
 redis:
   user:
-    address: "127.0.0.1:6379"
+    address: "112.74.48.21:6379"
     dbnum: 0
     password: ""
   sms:
-    address: "127.0.0.1:6379"
+    address: "112.74.48.21:6379"
     dbnum: 1
     password: ""
 
