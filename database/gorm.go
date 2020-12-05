@@ -23,5 +23,5 @@ func init() {
 	GormDB = db
 	GormDB.SingularTable(true)
 	//自动迁移
-	GormDB.AutoMigrate(&PhoneCode{})
+	GormDB.AutoMigrate(&PhoneCode{}, &Photo{}, &Publish{})
 }
