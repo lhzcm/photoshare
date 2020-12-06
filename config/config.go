@@ -23,7 +23,8 @@ func init() {
 }
 
 type Config struct {
-	Token TokenConfig `yaml:"token"`
-	Mssql MssqlConfig `yaml:"mssql"`
-	Redis RedisConfig `yaml:"redis"`
+	Server ServerConfig `yaml:"server"`
+	Token  TokenConfig  `yaml:"token"`
+	Mssql  MssqlConfig  `yaml:"mssql"`
+	Redis  RedisConfig  `yaml:"redis"`
 }
