@@ -7,7 +7,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"sync/atomic"
 	"time"
@@ -33,32 +32,31 @@ func readMachineId() []byte {
 	hw := md5.New()
 	hw.Write([]byte(hostname))
 	copy(id, hw.Sum(nil))
-	log.Println("readMachineId:" + string(id))
 	return id
 }
 
 // GUID returns a new unique ObjectId.
-// 4byte 时间，
+// 8byte 时间，
 // 3byte 机器ID
 // 2byte pid
 // 3byte 自增ID
 func GetGUID() ObjectId {
-	var b [12]byte
+	var b [16]byte
 	// Timestamp, 4 bytes, big endian
-	binary.BigEndian.PutUint32(b[:], uint32(time.Now().Unix()))
+	binary.BigEndian.PutUint64(b[:], uint64(time.Now().UnixNano()))
 	// Machine, first 3 bytes of md5(hostname)
-	b[4] = machineId[0]
-	b[5] = machineId[1]
-	b[6] = machineId[2]
+	b[8] = machineId[0]
+	b[9] = machineId[1]
+	b[10] = machineId[2]
 	// Pid, 2 bytes, specs don't specify endianness, but we use big endian.
 	pid := os.Getpid()
-	b[7] = byte(pid >> 8)
-	b[8] = byte(pid)
+	b[11] = byte(pid >> 8)
+	b[12] = byte(pid)
 	// Increment, 3 bytes, big endian
 	i := atomic.AddUint32(&objectIdCounter, 1)
-	b[9] = byte(i >> 16)
-	b[10] = byte(i >> 8)
-	b[11] = byte(i)
+	b[13] = byte(i >> 16)
+	b[14] = byte(i >> 8)
+	b[15] = byte(i)
 	return ObjectId(b[:])
 }
 

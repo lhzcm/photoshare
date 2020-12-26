@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
 	. "photoshare/apis"
+
+	"github.com/gin-gonic/gin"
 )
 
 func initRouter() *gin.Engine {

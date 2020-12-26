@@ -12,3 +12,7 @@ type Photo struct {
 	Info      string    `gorm:"null;type:varchar(1024)"`
 	Writetime time.Time `gorm:"not null;default:getdate();type:datetime"`
 }
+
+func (Photo) TableName() string {
+	return "t_photo"
+}

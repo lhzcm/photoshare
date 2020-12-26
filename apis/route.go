@@ -7,4 +7,5 @@ type Router gin.Engine
 func RouteRegister(e *gin.Engine) {
 	router := (*Router)(e)
 	router.UserRouteRegister()
+	router.PublishRouteRegister()
 }

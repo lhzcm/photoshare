@@ -34,6 +34,14 @@ func UserInfo(c *gin.Context) {
 	c.JSON(http.StatusOK, Success(user, "成功获取用户信息"))
 }
 
+//获取用户信息
+func GetUserInfo(c *gin.Context) User {
+	if user, isexists := c.Get("user"); isexists {
+		return user.(User)
+	}
+	return User{}
+}
+
 //通过用户id获取用户信息
 func UserInfoById(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))

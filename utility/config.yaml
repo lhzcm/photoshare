@@ -27,4 +27,3 @@ redis:
 static:
   publishimgpath: "./image/"
   allowimg: "png,jpg"
-  maxuploadimgsize: 104857600
