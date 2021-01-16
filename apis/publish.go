@@ -9,6 +9,7 @@ import (
 	. "photoshare/models"
 	"photoshare/service"
 	"photoshare/utility"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,6 +17,9 @@ import (
 //route配置
 func (router *Router) PublishRouteRegister() {
 	router.POST("/publish/uploadimg", middleware.UserValidate, ImageUpload)
+	router.POST("/publish", middleware.UserValidate, Publishing)
+	router.DELETE("/publish/:id", middleware.UserValidate, PublishDelete)
+	router.GET("/publish/:page/:pagesize", middleware.UserValidate, GetPublishList)
 }
 
 //图片上传接口
@@ -58,4 +62,86 @@ func ImageUpload(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, Success(photo, "请求成功"))
+}
+
+//发布
+func Publishing(c *gin.Context) {
+	publish := Publish{}
+	c.BindJSON(&publish)
+
+	user := GetUserInfo(c)
+
+	publish.Userid = user.Id
+
+	if length := len(publish.Content); length < 5 || length > 512 {
+		c.JSON(http.StatusOK, Fail("内容文字不能小于5个字且不能大于512个字"))
+		return
+	}
+	imgids, err := utility.StringToIntArray(publish.Imgs, ",")
+	if err != nil {
+		c.JSON(http.StatusOK, Fail("上传的图片有误"))
+		return
+	}
+
+	if len(imgids) > 0 && service.PhotoIsUser(imgids, int(user.Id)) < len(imgids) {
+		c.JSON(http.StatusOK, Fail("上传图片有误，不是自己上传的图片"))
+		return
+	}
+
+	err = service.SavePublish(&publish, imgids)
+	if err != nil {
+		c.JSON(http.StatusOK, Fail("动态发布失败"))
+		return
+	}
+
+	c.JSON(http.StatusOK, Success(publish, "动态发布成功"))
+}
+
+//删除动态
+func PublishDelete(c *gin.Context) {
+	idstr, hasid := c.Params.Get("id")
+	if !hasid {
+		c.JSON(http.StatusOK, Fail("参数错误"))
+		return
+	}
+	id, err := strconv.Atoi(idstr)
+	if err != nil {
+		c.JSON(http.StatusOK, Fail("参数错误"))
+		return
+	}
+	user := GetUserInfo(c)
+	if err = service.DeletePublish(int32(id), user.Id); err != nil {
+		c.JSON(http.StatusOK, Fail("删除失败"))
+		return
+	}
+	c.JSON(http.StatusOK, Success(nil, "删除成功"))
+}
+
+//获取动态列表
+func GetPublishList(c *gin.Context) {
+
+	page, err := strconv.Atoi(c.Param("page"))
+	if err != nil {
+		c.JSON(http.StatusOK, Fail("参数错误"))
+		return
+	}
+
+	var pagesize int
+	pagesize, err = strconv.Atoi(c.Param("pagesize"))
+	if err != nil {
+		c.JSON(http.StatusOK, Fail("参数错误"))
+		return
+	}
+
+	var result map[string]interface{} = make(map[string]interface{}, 2)
+	user := GetUserInfo(c)
+
+	publishs, total, err := service.GetPublishList(int(user.Id), page, pagesize)
+	if err != nil {
+		c.JSON(http.StatusOK, Fail(err.Error()))
+	}
+	result["publishs"] = publishs
+	result["total"] = total
+
+	c.JSON(http.StatusOK, Success(result, "请求成功"))
 }

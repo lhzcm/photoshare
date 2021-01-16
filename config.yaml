@@ -25,6 +25,6 @@ redis:
 
 #静态资源配置
 static:
-  publishimgpath: "./image/"
+  publishimgpath: "./image/uploadimg/"
   allowimg: "png,jpg"
   maxuploadimgsize: 104857600

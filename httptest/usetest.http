@@ -1,5 +1,5 @@
-#@host = http://localhost:8080
-@host = http://www.onlinemusic.top:8080
+@host = http://localhost:8080
+#@host = http://www.onlinemusic.top:8080
 
 ###注册接口
 POST {{host}}/user HTTP/1.1
@@ -26,7 +26,7 @@ POST {{host}}/user/login HTTP/1.1
 
 ###获取用户信息接口
 GET {{host}}/user/info HTTP/1.1
-Cookie: token=1023-fffffac108574ededae36bc5fc1d6885-1608824850
+Cookie: token=1023-8141b927404f2288e06b7612a5ab38fc-1611570133
 
 
 ###获取注册码接口
@@ -39,3 +39,28 @@ GET {{host}}/user/callback?mobile=17854276064&content=34 HTTP/1.1
 
 ###获取注册码信息接口
 GET {{host}}/user/code/34 HTTP/1.1
+
+
+
+
+###上传图片接口
+POST {{host}}/publish/uploadimg HTTP/1.1
+Cookie: token=1023-8141b927404f2288e06b7612a5ab38fc-1611570133
+
+###发布图文信息
+POST {{host}}/publish HTTP/1.1
+Cookie: token=1023-8141b927404f2288e06b7612a5ab38fc-1611570133
+
+{
+    "content" : "文章测试",
+    "imgs" : "1,2,3,4",
+    "type" : 0,
+    "lng" : 32.12,
+    "lat" : 12.3,
+    "position": "广东,深圳"
+}
+
+
+###发布图文信息
+DELETE {{host}}/publish/1 HTTP/1.1
+Cookie: token=1023-8141b927404f2288e06b7612a5ab38fc-1611570133

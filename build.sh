@@ -1,0 +1,1 @@
+sudo CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o bin/photoshare.exe ./ & sudo cp ./config.yaml ./bin/config.yaml
