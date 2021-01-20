@@ -20,6 +20,7 @@ func (router *Router) PublishRouteRegister() {
 	router.POST("/publish", middleware.UserValidate, Publishing)
 	router.DELETE("/publish/:id", middleware.UserValidate, PublishDelete)
 	router.GET("/publish/:page/:pagesize", middleware.UserValidate, GetPublishList)
+	router.POST("/praise/:id/:type/:ispraise", middleware.UserValidate, PublishPraise)
 }
 
 //图片上传接口
@@ -144,4 +145,36 @@ func GetPublishList(c *gin.Context) {
 	result["total"] = total
 
 	c.JSON(http.StatusOK, Success(result, "请求成功"))
+}
+
+func PublishPraise(c *gin.Context) {
+	var id, ptype int
+	var err error
+	var ispraise int
+
+	if id, err = strconv.Atoi(c.Param("id")); err != nil {
+		c.JSON(http.StatusOK, Fail("参数错误"))
+		return
+	}
+	if ptype, err = strconv.Atoi(c.Param("type")); err != nil {
+		c.JSON(http.StatusOK, Fail("参数错误"))
+	}
+	if ispraise, err = strconv.Atoi(c.Param("ispraise")); err != nil {
+		c.JSON(http.StatusOK, Fail("参数错误"))
+	}
+	user := GetUserInfo(c)
+
+	if ispraise == 0 {
+		if err = service.PublishUnPraise(user.Id, id, ptype); err != nil {
+			c.JSON(http.StatusOK, Fail(err.Error()))
+			return
+		}
+		c.JSON(http.StatusOK, Success(nil, "取消点赞成功"))
+	} else {
+		if err = service.PublishPraise(user.Id, id, ptype); err != nil {
+			c.JSON(http.StatusOK, Fail(err.Error()))
+			return
+		}
+		c.JSON(http.StatusOK, Success(nil, "点赞成功"))
+	}
 }

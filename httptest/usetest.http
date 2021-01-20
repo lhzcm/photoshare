@@ -47,7 +47,7 @@ GET {{host}}/user/code/34 HTTP/1.1
 POST {{host}}/publish/uploadimg HTTP/1.1
 Cookie: token=1023-8141b927404f2288e06b7612a5ab38fc-1611570133
 
-###发布图文信息
+###发布动态信息
 POST {{host}}/publish HTTP/1.1
 Cookie: token=1023-8141b927404f2288e06b7612a5ab38fc-1611570133
 
@@ -61,6 +61,20 @@ Cookie: token=1023-8141b927404f2288e06b7612a5ab38fc-1611570133
 }
 
 
-###发布图文信息
+###删除动态信息
 DELETE {{host}}/publish/1 HTTP/1.1
+Cookie: token=1023-8141b927404f2288e06b7612a5ab38fc-1611570133
+
+
+###获取动态信息列表
+GET {{host}}/publish/1/10 HTTP/1.1
+Cookie: token=1023-8141b927404f2288e06b7612a5ab38fc-1611570133
+
+
+###点赞动态
+POST {{host}}/praise/5/0/1 HTTP/1.1
+Cookie: token=1023-8141b927404f2288e06b7612a5ab38fc-1611570133
+
+###取消动态点赞
+POST {{host}}/praise/5/0/0 HTTP/1.1
 Cookie: token=1023-8141b927404f2288e06b7612a5ab38fc-1611570133

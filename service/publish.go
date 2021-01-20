@@ -80,3 +80,82 @@ func GetPublishList(userid int, page int, pagesize int) (publishs []Publish, tot
 
 	return publishs, total, nil
 }
+
+//用户点赞
+func PublishPraise(userid int32, id int, ptype int) error {
+	var publish Publish
+	var comment Comment
+	if ptype == 0 { //动态点赞
+		db.GormDB.Where("id = ?", id).Where("status = 0").First(&publish)
+		if publish.Id == 0 {
+			return errors.New("点赞失败，没有找到对应的动态")
+		}
+		tran := db.GormDB.Begin()
+		if tran.Model(&Publish{}).Where("id = ?", id).Update(&Publish{Praise: publish.Praise + 1}).RowsAffected == 0 {
+			tran.Rollback()
+			return errors.New("点赞失败")
+		}
+		if tran.Create(&Praise{Rid: publish.Id, Userid: userid, Type: 0}).RowsAffected == 0 {
+			tran.Rollback()
+			return errors.New("点赞失败")
+		}
+		tran.Commit()
+	} else { //评论点赞
+		db.GormDB.Where("id = ?", id).Where("status = 0").First(&comment)
+		if comment.Id == 0 {
+			return errors.New("点赞失败，没有找到对应的评论")
+		}
+		tran := db.GormDB.Begin()
+		if tran.Model(&Comment{}).Where("id = ?", id).Update(&Comment{Praise: comment.Praise + 1}).RowsAffected == 0 {
+			tran.Rollback()
+			return errors.New("点赞失败")
+		}
+		if tran.Create(&Praise{Rid: comment.Id, Userid: userid, Type: 1}).RowsAffected == 0 {
+			tran.Rollback()
+			return errors.New("点赞失败")
+		}
+		tran.Commit()
+	}
+
+	return nil
+}
+
+//用户取消点赞
+func PublishUnPraise(userid int32, id int, ptype int) error {
+	var publish Publish
+	var comment Comment
+	if ptype == 0 { //动态点赞
+		db.GormDB.Where("id = ?", id).Where("status = 0").First(&publish)
+		if publish.Id == 0 {
+			return errors.New("取消点赞失败，没有找到对应的动态")
+		}
+		tran := db.GormDB.Begin()
+		if tran.Model(&Publish{}).Where("id = ?", id).Update("praise", publish.Praise-1).RowsAffected == 0 {
+			tran.Rollback()
+			return errors.New("取消点赞失败")
+		}
+		if tran.Where("rid = ?", id).Where("userid = ?", userid).Where("type = ?", 0).Delete(&Praise{}).RowsAffected == 0 {
+			tran.Rollback()
+			return errors.New("取消点赞失败")
+		}
+		tran.Commit()
+	} else { //评论点赞
+		db.GormDB.Where("id = ?", id).Where("status = 0").First(&comment)
+		if comment.Id == 0 {
+			return errors.New("取消点赞失败，没有找到对应的评论")
+		}
+		tran := db.GormDB.Begin()
+		if tran.Model(&Comment{}).Where("id = ?", id).Update("praise", comment.Praise-1).RowsAffected == 0 {
+			tran.Rollback()
+			return errors.New("取消点赞失败")
+		}
+
+		if tran.Where("rid = ?", id).Where("userid = ?", userid).Where("type = ?", 1).Delete(&Praise{}).RowsAffected == 0 {
+			tran.Rollback()
+			return errors.New("取消点赞失败")
+		}
+		tran.Commit()
+	}
+
+	return nil
+}
