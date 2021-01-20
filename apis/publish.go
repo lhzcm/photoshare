@@ -21,6 +21,7 @@ func (router *Router) PublishRouteRegister() {
 	router.DELETE("/publish/:id", middleware.UserValidate, PublishDelete)
 	router.GET("/publish/:page/:pagesize", middleware.UserValidate, GetPublishList)
 	router.POST("/praise/:id/:type/:ispraise", middleware.UserValidate, PublishPraise)
+	router.POST("/comment", middleware.UserValidate, PublishComment)
 }
 
 //图片上传接口
@@ -140,6 +141,7 @@ func GetPublishList(c *gin.Context) {
 	publishs, total, err := service.GetPublishList(int(user.Id), page, pagesize)
 	if err != nil {
 		c.JSON(http.StatusOK, Fail(err.Error()))
+		return
 	}
 	result["publishs"] = publishs
 	result["total"] = total
@@ -147,10 +149,10 @@ func GetPublishList(c *gin.Context) {
 	c.JSON(http.StatusOK, Success(result, "请求成功"))
 }
 
+//用户点赞或者取消点赞
 func PublishPraise(c *gin.Context) {
-	var id, ptype int
+	var id, ptype, ispraise int
 	var err error
-	var ispraise int
 
 	if id, err = strconv.Atoi(c.Param("id")); err != nil {
 		c.JSON(http.StatusOK, Fail("参数错误"))
@@ -158,9 +160,11 @@ func PublishPraise(c *gin.Context) {
 	}
 	if ptype, err = strconv.Atoi(c.Param("type")); err != nil {
 		c.JSON(http.StatusOK, Fail("参数错误"))
+		return
 	}
 	if ispraise, err = strconv.Atoi(c.Param("ispraise")); err != nil {
 		c.JSON(http.StatusOK, Fail("参数错误"))
+		return
 	}
 	user := GetUserInfo(c)
 
@@ -177,4 +181,26 @@ func PublishPraise(c *gin.Context) {
 		}
 		c.JSON(http.StatusOK, Success(nil, "点赞成功"))
 	}
+}
+
+func PublishComment(c *gin.Context) {
+	var comment Comment
+	if err := c.BindJSON(&comment); err != nil {
+		c.JSON(http.StatusOK, Fail("参数错误"))
+		return
+	}
+	if len(comment.Content) <= 5 || len(comment.Content) > 256 {
+		c.JSON(http.StatusOK, Fail("评论失败，评论字数不能小于5个字也不能大于256个字"))
+		return
+	}
+	comment.Praise = 0
+	comment.Comments = 0
+	comment.Status = 0
+	comment.Userid = GetUserInfo(c).Id
+
+	if err := service.PublishComment(&comment); err != nil {
+		c.JSON(http.StatusOK, Fail(err.Error()))
+		return
+	}
+	c.JSON(http.StatusOK, Success(comment, "评论成功"))
 }

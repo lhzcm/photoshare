@@ -78,3 +78,23 @@ Cookie: token=1023-8141b927404f2288e06b7612a5ab38fc-1611570133
 ###取消动态点赞
 POST {{host}}/praise/5/0/0 HTTP/1.1
 Cookie: token=1023-8141b927404f2288e06b7612a5ab38fc-1611570133
+
+###用户评论动态
+POST {{host}}/comment HTTP/1.1
+Cookie: token=1023-8141b927404f2288e06b7612a5ab38fc-1611570133
+
+{
+    "pid" : 5,
+    "cid" : 0,
+    "content" : "测试测试测试"
+}
+
+###用户评论评论
+POST {{host}}/comment HTTP/1.1
+Cookie: token=1023-8141b927404f2288e06b7612a5ab38fc-1611570133
+
+{
+    "pid" : 5,
+    "cid" : 1,
+    "content" : "测试测试测试"
+}

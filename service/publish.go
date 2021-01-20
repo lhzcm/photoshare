@@ -159,3 +159,42 @@ func PublishUnPraise(userid int32, id int, ptype int) error {
 
 	return nil
 }
+
+func PublishComment(c *Comment) error {
+	var publish Publish
+	var comment Comment
+	if c.Cid == 0 { //评论动态
+		db.GormDB.Where("id = ?", c.Pid).Where("status = 0").First(&publish)
+		if publish.Id == 0 {
+			return errors.New("评论失败，没有找到对应的动态")
+		}
+		tran := db.GormDB.Begin()
+		if tran.Model(&Publish{}).Where("id = ?", c.Pid).Update("comments", publish.Comments+1).RowsAffected == 0 {
+			tran.Rollback()
+			return errors.New("评论失败")
+		}
+		if tran.Create(c).RowsAffected == 0 {
+			tran.Rollback()
+			return errors.New("评论失败")
+		}
+		tran.Commit()
+	} else { //评论评论
+		db.GormDB.Where("id = ?", c.Cid).Where("pid = ?", c.Pid).Where("status = 0").First(&comment)
+		if comment.Id == 0 {
+			return errors.New("评论失败，没有找到对应的评论")
+		}
+		tran := db.GormDB.Begin()
+		if tran.Model(&Comment{}).Where("id = ?", c.Cid).Update("comments", comment.Comments+1).RowsAffected == 0 {
+			tran.Rollback()
+			return errors.New("评论失败")
+		}
+		if tran.Create(c).RowsAffected == 0 {
+			tran.Rollback()
+			return errors.New("评论失败")
+		}
+		tran.Commit()
+	}
+
+	return nil
+
+}

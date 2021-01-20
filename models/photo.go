@@ -5,7 +5,7 @@ import (
 )
 
 type Photo struct {
-	Id        int32     `gorm:"primary key;identity"`
+	Id        int32     `gorm:"primary key;AUTO_INCREMENT"`
 	Userid    int32     `gorm:"not null"`
 	Pid       int32     `gorm:"not null;index;default:0"`
 	Imgurl    string    `gorm:"not null;type:varchar(256)"`
