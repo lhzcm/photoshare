@@ -10,6 +10,7 @@ func RouteRegister(e *gin.Engine) {
 	router.Use(CORS)
 	router.UserRouteRegister()
 	router.PublishRouteRegister()
+	router.InvitationRouteRegister()
 }
 
 //跨域设置

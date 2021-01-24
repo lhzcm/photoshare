@@ -20,7 +20,7 @@ Cookie: token=1023-5ca282a436d0c87e532fbc9a3e8e737f-1608653320
 POST {{host}}/user/login HTTP/1.1
 
 {
-    "Id" : 1023,
+    "Id" : 1030,
     "Password" : "test123"
 }
 
@@ -97,4 +97,27 @@ Cookie: token=1023-8141b927404f2288e06b7612a5ab38fc-1611570133
     "pid" : 5,
     "cid" : 1,
     "content" : "测试测试测试"
+}
+
+
+###用户邀请好友
+POST {{host}}/invite HTTP/1.1
+Cookie: token=1023-8141b927404f2288e06b7612a5ab38fc-1611570133
+
+{
+    "invitedid" : 1030,
+    "message" : "邀请你为好友"
+}
+
+###获取邀请列表
+GET {{host}}/invite/1/10/0 HTTP/1.1
+Cookie: token=1030-7e986889eb843c11c0086413e90aee29-1614091521
+
+##接受好友邀请
+PATCH {{host}}/invite HTTP/1.1
+Cookie: token=1030-7e986889eb843c11c0086413e90aee29-1614091521
+
+{
+    "id" : 2,
+    "status" : 1
 }
