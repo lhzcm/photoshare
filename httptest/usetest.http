@@ -9,7 +9,7 @@ Cookie: token=1023-5ca282a436d0c87e532fbc9a3e8e737f-1608653320
 {
     "Name" : "临时工",
     "Headimg" : "",
-    "Phone" : "17854276299",
+    "Phone" : "17854276206",
     "City" : 0,
     "Brithday" : "2020-11-11T00:00:00Z",
     "Ismale" : true,
@@ -38,7 +38,7 @@ GET {{host}}/user/callback?mobile=17854276064&content=34 HTTP/1.1
 
 
 ###获取注册码信息接口
-GET {{host}}/user/code/34 HTTP/1.1
+GET {{host}}/user/code/1071 HTTP/1.1
 
 
 
@@ -53,7 +53,7 @@ Cookie: token=1023-8141b927404f2288e06b7612a5ab38fc-1611570133
 
 {
     "content" : "文章测试",
-    "imgs" : "1,2,3,4",
+    "imgs" : "10",
     "type" : 0,
     "lng" : 32.12,
     "lat" : 12.3,
@@ -62,7 +62,7 @@ Cookie: token=1023-8141b927404f2288e06b7612a5ab38fc-1611570133
 
 
 ###删除动态信息
-DELETE {{host}}/publish/1 HTTP/1.1
+DELETE {{host}}/publish/14 HTTP/1.1
 Cookie: token=1023-8141b927404f2288e06b7612a5ab38fc-1611570133
 
 
@@ -72,7 +72,7 @@ Cookie: token=1023-8141b927404f2288e06b7612a5ab38fc-1611570133
 
 
 ###点赞动态
-POST {{host}}/praise/5/0/1 HTTP/1.1
+POST {{host}}/praise/7/0/1 HTTP/1.1
 Cookie: token=1023-8141b927404f2288e06b7612a5ab38fc-1611570133
 
 ###取消动态点赞

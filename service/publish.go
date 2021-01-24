@@ -22,10 +22,10 @@ func PhotoIsUser(ids []int, userid int) int {
 	for i, item := range ids {
 		strs[i] = strconv.Itoa(item)
 	}
-	var count int = 0
+	var count int64 = 0
 	db.GormDB.Model(&Photo{}).Where("id in (?)", ids).
 		Where("userid = ?", userid).Count(&count)
-	return count
+	return int(count)
 }
 
 //保存用户发表的动态
@@ -50,7 +50,7 @@ func SavePublish(p *Publish, ids []int) error {
 //删除动态
 func DeletePublish(id int32, userid int32) error {
 	exec := db.GormDB.Model(&Publish{}).Where("id = ?", id).
-		Where("userid = ?", userid).Update(&Publish{Status: -1})
+		Where("userid = ?", userid).Update("status", -1)
 	if exec.Error != nil {
 		return exec.Error
 	}
@@ -61,7 +61,7 @@ func DeletePublish(id int32, userid int32) error {
 }
 
 //获取用户动态列表
-func GetPublishList(userid int, page int, pagesize int) (publishs []Publish, total int, err error) {
+func GetPublishList(userid int, page int, pagesize int) (publishs []Publish, total int64, err error) {
 	var photos []Photo
 
 	db.GormDB.Model(&Publish{}).Where("userid = ? and status = 0", userid).Count(&total)
@@ -91,7 +91,7 @@ func PublishPraise(userid int32, id int, ptype int) error {
 			return errors.New("点赞失败，没有找到对应的动态")
 		}
 		tran := db.GormDB.Begin()
-		if tran.Model(&Publish{}).Where("id = ?", id).Update(&Publish{Praise: publish.Praise + 1}).RowsAffected == 0 {
+		if tran.Model(&Publish{}).Where("id = ?", id).Update("praise", publish.Praise+1).RowsAffected == 0 {
 			tran.Rollback()
 			return errors.New("点赞失败")
 		}
@@ -106,7 +106,7 @@ func PublishPraise(userid int32, id int, ptype int) error {
 			return errors.New("点赞失败，没有找到对应的评论")
 		}
 		tran := db.GormDB.Begin()
-		if tran.Model(&Comment{}).Where("id = ?", id).Update(&Comment{Praise: comment.Praise + 1}).RowsAffected == 0 {
+		if tran.Model(&Comment{}).Where("id = ?", id).Update("praise", comment.Praise+1).RowsAffected == 0 {
 			tran.Rollback()
 			return errors.New("点赞失败")
 		}

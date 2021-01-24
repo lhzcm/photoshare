@@ -5,7 +5,7 @@ import (
 )
 
 type PhoneCode struct {
-	Id         int32     `gorm:"primary_key;AUTO_INCREMENT" json:"Id,string"`
+	Id         int32     `gorm:"primary_key;AUTO_INCREMENT"`
 	Phone      string    `gorm:"null;type:char(11);default:null"`
 	Writetime  time.Time `gorm:"not null;default:getdate();type:datetime"`
 	Updatetime time.Time `gorm:"null;type:datetime;default:null"`

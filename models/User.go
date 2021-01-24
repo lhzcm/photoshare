@@ -13,7 +13,7 @@ type User struct {
 	Brithday   time.Time `gorm:"not null;type:date"`
 	Ismale     bool      `gorm:"not null"`
 	Password   string    `gorm:"not null"`
-	Updatetime time.Time `gorm:"not null;type:datetime"`
+	Updatetime time.Time `gorm:"not null;type:datetime;default:getdate()"`
 	Writetime  time.Time `gorm:"not null;type:datetime;default:getdate()"`
 	Token      string    `gorm:"not null;type:varchar(128)"`
 }

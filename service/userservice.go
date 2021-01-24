@@ -36,7 +36,7 @@ func UserLogin(id int32, password string) (user User, token string, err error) {
 
 //用注册
 func UserRegister(user *User) error {
-	var count int
+	var count int64
 	if err := db.GormDB.Where("phone = ?", user.Phone).Find(&User{}).Count(&count).Error; err != nil {
 		log.Println(err)
 		return errors.New("系统错误")
@@ -51,10 +51,10 @@ func UserRegister(user *User) error {
 }
 
 //创建注册码PhoneCode
-func CreatePhoneCode() (int32, error) {
-	phonecode := PhoneCode{}
+func CreatePhoneCode() (PhoneCode, error) {
+	phonecode := PhoneCode{Writetime: time.Now()}
 	err := db.GormDB.Create(&phonecode).Error
-	return phonecode.Id, err
+	return phonecode, err
 }
 
 //获取注册码详情
@@ -66,6 +66,6 @@ func GetPhoneCode(id int32) (p PhoneCode, err error) {
 //更新PoneCode
 func UpdatePhoneCode(id int32, phone string) (int64, error) {
 	dbexec := db.GormDB.Model(&PhoneCode{}).Where("id = ?", id).Where("phone is null").
-		Update(PhoneCode{Phone: phone, Updatetime: time.Now()})
+		Updates(PhoneCode{Phone: phone, Updatetime: time.Now()})
 	return dbexec.RowsAffected, dbexec.Error
 }
