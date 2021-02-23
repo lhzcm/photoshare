@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"photoshare/middleware"
 	. "photoshare/models"
@@ -120,25 +121,36 @@ func GetPhoneCode(c *gin.Context) {
 
 //第三方回调Phone注册码
 func CallBackPhoneCode(c *gin.Context) {
+	xmlHead := "<?xml version=\"1.0\" encoding=\"GB2312\"?>\n"
+	xmlhead := []byte(xmlHead)
 	phone := c.Query("mobile")
 	result := KeliResult{Version: "1.0"}
+	strs := strings.Split(c.Query("content"), "xin#")
 
-	code, err := strconv.ParseInt(c.Query("content"), 10, 32)
-	if err != nil {
-		result.ResultInfo = "返回code码有误"
-		xmlhead := []byte(xml.Header)
+	if len(strs) != 2 {
+		result.ResultInfo = "param error"
 		xmlcontent, _ := xml.MarshalIndent(result, "", "    ")
 		xmlbytes := append(xmlhead, xmlcontent...)
+		//xmlbytes, _, _, _ = gogb2312.ConvertGB2312(xmlbytes)
+		c.String(http.StatusOK, string(xmlbytes))
+		return
+	}
 
+	code, err := strconv.ParseInt(strs[1], 10, 32)
+	if err != nil {
+		result.ResultInfo = "code error"
+		xmlcontent, _ := xml.MarshalIndent(result, "", "    ")
+		xmlbytes := append(xmlhead, xmlcontent...)
+		//xmlbytes, _, _, _ = gogb2312.ConvertGB2312(xmlbytes)
 		c.String(http.StatusOK, string(xmlbytes))
 		return
 	}
 
 	if len(phone) != 11 {
-		result.ResultInfo = "手机号码有误"
-		xmlhead := []byte(xml.Header)
+		result.ResultInfo = "phone error"
 		xmlcontent, _ := xml.MarshalIndent(result, "", "    ")
 		xmlbytes := append(xmlhead, xmlcontent...)
+		//xmlbytes, _, _, _ = gogb2312.ConvertGB2312(xmlbytes)
 		//c.XML(http.StatusOK, result)
 		c.String(http.StatusOK, string(xmlbytes))
 		return
@@ -147,29 +159,28 @@ func CallBackPhoneCode(c *gin.Context) {
 	var rowcount int64
 	if rowcount, err = service.UpdatePhoneCode(int32(code), phone); err != nil {
 		result.ResultInfo = err.Error()
-		xmlhead := []byte(xml.Header)
 		xmlcontent, _ := xml.MarshalIndent(result, "", "    ")
 		xmlbytes := append(xmlhead, xmlcontent...)
+		//xmlbytes, _, _, _ = gogb2312.ConvertGB2312(xmlbytes)
 		//c.XML(http.StatusOK, result)
 		c.String(http.StatusOK, string(xmlbytes))
 		return
 	}
 	if rowcount <= 0 {
-		result.ResultInfo = "更新失败"
-		xmlhead := []byte(xml.Header)
+		result.ResultInfo = "update error"
 		xmlcontent, _ := xml.MarshalIndent(result, "", "    ")
 		xmlbytes := append(xmlhead, xmlcontent...)
+		//xmlbytes, _, _, _ = gogb2312.ConvertGB2312(xmlbytes)
 		//c.XML(http.StatusOK, result)
 		c.String(http.StatusOK, string(xmlbytes))
 		return
 	}
 
 	result.Result = 1
-	result.ResultInfo = "注册码发送成功"
-	xmlhead := []byte(xml.Header)
+	result.ResultInfo = "success"
 	xmlcontent, _ := xml.MarshalIndent(result, "", "    ")
 	xmlbytes := append(xmlhead, xmlcontent...)
-
+	//xmlbytes, _, _, _ = gogb2312.ConvertGB2312(xmlbytes)
 	//c.XML(http.StatusOK, result)
 	c.String(http.StatusOK, string(xmlbytes))
 	return

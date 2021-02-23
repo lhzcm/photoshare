@@ -15,7 +15,7 @@ func GetUserInfoById(id int32) (user User, err error) {
 	if user, err = redis.Redisgetuser(id); err == nil {
 		return
 	}
-	db.GormDB.Where("id = ?", id).First(&user)
+	err = db.GormDB.Where("id = ?", id).First(&user).Error
 	redis.Redissetuser(user)
 	return
 }

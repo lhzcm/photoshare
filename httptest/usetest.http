@@ -1,5 +1,5 @@
-@host = http://localhost:8080
-#@host = http://www.onlinemusic.top:8080
+#@host = http://localhost:8080
+@host = http://www.onlinemusic.top:8080
 
 ###注册接口
 POST {{host}}/user HTTP/1.1
@@ -34,13 +34,11 @@ GET {{host}}/user/code HTTP/1.1
 
 
 ###第三方回调注册码接口
-GET {{host}}/user/callback?mobile=17854276064&content=34 HTTP/1.1
+GET {{host}}/user/callback?mobile=17854276064&content=%78%69%6E%23%31%32%32%35 HTTP/1.1
 
 
 ###获取注册码信息接口
-GET {{host}}/user/code/1071 HTTP/1.1
-
-
+GET {{host}}/user/code/1227 HTTP/1.1
 
 
 ###上传图片接口
@@ -113,11 +111,15 @@ Cookie: token=1023-8141b927404f2288e06b7612a5ab38fc-1611570133
 GET {{host}}/invite/1/10/0 HTTP/1.1
 Cookie: token=1030-7e986889eb843c11c0086413e90aee29-1614091521
 
-##接受好友邀请
+###接受好友邀请
 PATCH {{host}}/invite HTTP/1.1
 Cookie: token=1030-7e986889eb843c11c0086413e90aee29-1614091521
 
 {
-    "id" : 2,
-    "status" : 1
+    "status" : 3,
+    "id" : 1
 }
+
+###获取好友列表
+GET {{host}}/friend HTTP/1.1
+Cookie: token=1030-7e986889eb843c11c0086413e90aee29-1614091521

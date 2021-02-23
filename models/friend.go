@@ -3,10 +3,11 @@ package models
 import "time"
 
 type Friend struct {
-	Userid    int32     `gorm:"primary_key"`                              //用户id
-	Friendid  int32     `gorm:"primary_key"`                              //好友id
-	Iid       int32     `gorm:"not null"`                                 //邀请id
-	Writetime time.Time `gorm:"not null;type:datetime;default:getdate()"` //添加时间
+	Userid     int32     `gorm:"primary_key"`                              //用户id
+	Friendid   int32     `gorm:"primary_key"`                              //好友id
+	Iid        int32     `gorm:"not null"`                                 //邀请id
+	Writetime  time.Time `gorm:"not null;type:datetime;default:getdate()"` //添加时间
+	FriendInfo User      `gorm:"-"`                                        //好友信息
 }
 
 func (Friend) TableName() string {
