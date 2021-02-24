@@ -13,7 +13,7 @@ import (
 func UserValidate(c *gin.Context) {
 	cookie, err := c.Request.Cookie("token")
 	if err != nil {
-		c.JSON(http.StatusOK, models.Nologin(err.Error()))
+		c.JSON(http.StatusOK, models.Nologin("token有误，请重新登录"))
 		c.Abort()
 		return
 	}
