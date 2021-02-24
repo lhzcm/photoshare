@@ -6,6 +6,7 @@ require (
 	github.com/denisenkom/go-mssqldb v0.9.0
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-redis/redis/v8 v8.3.3
+	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/guotie/gogb2312 v0.0.0-20160513031741-a052a05f3e7e
 	github.com/kr/pretty v0.1.0 // indirect
 	golang.org/x/net v0.0.0-20201021035429-f5854403a974 // indirect
