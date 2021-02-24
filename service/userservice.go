@@ -17,6 +17,7 @@ func GetUserInfoById(id int32) (user User, err error) {
 	}
 	err = db.GormDB.Where("id = ?", id).First(&user).Error
 	redis.Redissetuser(user)
+	user.Password = ""
 	return
 }
 

@@ -17,6 +17,7 @@ func (router *Router) InvitationRouteRegister() {
 	router.GET("/invite/:page/:pagesize/:status", middleware.UserValidate, InviteList)
 }
 
+//好友邀请
 func Invite(c *gin.Context) {
 	var invitation Invitation
 	if err := c.BindJSON(&invitation); err != nil {
@@ -35,6 +36,7 @@ func Invite(c *gin.Context) {
 	return
 }
 
+//接受好友邀请
 func InviteAccept(c *gin.Context) {
 	var invitation Invitation
 	if err := c.BindJSON(&invitation); err != nil {
@@ -57,6 +59,7 @@ func InviteAccept(c *gin.Context) {
 	c.JSON(http.StatusOK, Success(nil, "拒绝成功"))
 }
 
+//好友邀请列表
 func InviteList(c *gin.Context) {
 	var page, pagesize, status int
 	var err error

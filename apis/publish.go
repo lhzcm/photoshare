@@ -183,6 +183,7 @@ func PublishPraise(c *gin.Context) {
 	}
 }
 
+//动态评论
 func PublishComment(c *gin.Context) {
 	var comment Comment
 	if err := c.BindJSON(&comment); err != nil {
