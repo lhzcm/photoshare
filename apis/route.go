@@ -12,6 +12,7 @@ func RouteRegister(e *gin.Engine) {
 	router.PublishRouteRegister()
 	router.InvitationRouteRegister()
 	router.FriendRouteRegister()
+	router.MessageRouteRegister()
 }
 
 //跨域设置

@@ -6,15 +6,22 @@ type Hub struct {
 	unregister chan *Client      //注销客户端
 }
 
+var MainHub *Hub
+
 //启动集线器
-func (hub Hub) Start() {
+func Start() {
+	MainHub = &Hub{
+		register:   make(chan *Client),
+		unregister: make(chan *Client),
+		clients:    make(map[int32]*Client),
+	}
 	for {
 		select {
-		case client := <-hub.register:
-			hub.clients[client.user.Id] = client
-		case client := <-hub.unregister:
-			if _, ok := hub.clients[client.user.Id]; ok {
-				delete(hub.clients, client.user.Id)
+		case client := <-MainHub.register:
+			MainHub.clients[client.user.Id] = client
+		case client := <-MainHub.unregister:
+			if _, ok := MainHub.clients[client.user.Id]; ok {
+				delete(MainHub.clients, client.user.Id)
 				close(client.send)
 			}
 		}
