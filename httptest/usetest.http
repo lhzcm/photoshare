@@ -20,13 +20,13 @@ Cookie: token=1023-5ca282a436d0c87e532fbc9a3e8e737f-1608653320
 POST {{host}}/user/login HTTP/1.1
 
 {
-    "Id" : 1030,
+    "Id" : 1023,
     "Password" : "test123"
 }
 
 ###获取用户信息接口
 GET {{host}}/user/info HTTP/1.1
-Cookie: token=1023-8141b927404f2288e06b7612a5ab38fc-1611570133
+Cookie: token=1023-62b5ad48616eafe95ded17d23567230b-1616916452
 
 
 ###获取注册码接口

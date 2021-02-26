@@ -23,7 +23,15 @@ window.onload = function () {
         if (!msg.value) {
             return false;
         }
-        conn.send(msg.value);
+        var message = {
+            Code : 2,
+            Data : {
+                Receiverid : 1023,
+                Content : msg.value,
+                Type : 1
+            }
+        }
+        conn.send(JSON.stringify(message));
         msg.value = "";
         return false;
     };

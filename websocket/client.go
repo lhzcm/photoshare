@@ -6,13 +6,13 @@ import (
 	"log"
 	"net/http"
 	"photoshare/models"
+	"photoshare/service"
 	"strings"
 	"time"
 
 	"github.com/goinggo/mapstructure"
 	"github.com/gorilla/websocket"
 	ws "github.com/gorilla/websocket"
-	"github.com/mitchellh/mapstructure"
 )
 
 const (
@@ -42,11 +42,12 @@ type Client struct {
 }
 
 //向用户发送消息
-func (c *Client) Send(userid int32, msg []byte) error {
+func (c *Client) Send(userid int32, msg Result) error {
+	msgbyte, _ := json.Marshal(msg)
 	if client, ok := c.hub.clients[userid]; ok {
 
 		select {
-		case client.send <- msg:
+		case client.send <- msgbyte:
 		default:
 			delete(c.hub.clients, client.user.Id)
 			close(client.send)
@@ -107,11 +108,11 @@ func (c *Client) readPump() {
 		c.conn.Close()
 	}()
 	c.conn.SetReadLimit(maxMsgSize)
-	c.conn.SetReadDeadline(time.Now().Add(pongWait))
-	c.conn.SetPongHandler(func(msg string) error {
-		c.conn.SetReadDeadline(time.Now().Add(pongWait))
-		return nil
-	})
+	//c.conn.SetReadDeadline(time.Now().Add(pongWait))
+	// c.conn.SetPongHandler(func(msg string) error {
+	// 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
+	// 	return nil
+	// })
 	for {
 		_, message, err := c.conn.ReadMessage()
 		if err != nil {
@@ -141,15 +142,19 @@ func (c *Client) MessageDeal(msg string) {
 		data, ok := result.Data.(map[string]interface{})
 		if ok {
 			if err := mapstructure.Decode(data, &msg); err != nil {
-				//TODO
+				c.Send(msg.Senderid, SendMessageErr("消息解析错误"))
 				return
 			}
 		}
+		msg.Senderid = c.user.Id
 
-		//保存到数据库 TODO
+		if err := service.SendMessage(&msg); err != nil {
+			c.Send(msg.Senderid, SendMessageErr(err.Error()))
+			return
+		}
 
 		//发送给在线用户
-		c.Send(msg.Receiverid, []byte(msg.Content))
+		c.Send(msg.Receiverid, SendMessage(&msg))
 	}
 	//else TODO
 
@@ -157,6 +162,7 @@ func (c *Client) MessageDeal(msg string) {
 
 //启用websocket客户端
 func StartClient(w http.ResponseWriter, r *http.Request, user *models.User) {
+	log.Println(user)
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
