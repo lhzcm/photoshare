@@ -9,10 +9,7 @@ import (
 
 func SendMessage(msg *Message) error {
 	var count int64
-	if err := db.GormDB.Model(&models.Friend{}).
-		Where("userid = ? and friendid = ?", msg.Senderid, msg.Receiverid).Count(&count); err != nil {
-		return errors.New("消息发送失败！")
-	}
+	db.GormDB.Model(&models.Friend{}).Where("userid = ? and friendid = ?", msg.Senderid, msg.Receiverid).Count(&count)
 	if count == 0 {
 		return errors.New("消息发送失败！该用户不是你的好友")
 	}

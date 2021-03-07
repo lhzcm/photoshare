@@ -1,6 +1,6 @@
 #服务器配置
 server:
-  port: 8080
+  port: 9090
 #token加密密钥
 token:
   secret: "token_photoshare"

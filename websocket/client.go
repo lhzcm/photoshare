@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/goinggo/mapstructure"
-	"github.com/gorilla/websocket"
 	ws "github.com/gorilla/websocket"
 )
 
@@ -28,9 +27,10 @@ const (
 
 var (
 	newline  = []byte{'\n'}
-	upgrader = websocket.Upgrader{
+	upgrader = ws.Upgrader{
 		ReadBufferSize:  2048,
 		WriteBufferSize: 2048,
+		CheckOrigin:     func(r *http.Request) bool { return true },
 	}
 )
 
@@ -74,7 +74,7 @@ func (c *Client) writePump() {
 				return
 			}
 
-			w, err := c.conn.NextWriter(websocket.TextMessage)
+			w, err := c.conn.NextWriter(ws.TextMessage)
 			if err != nil {
 				return
 			}
@@ -93,6 +93,7 @@ func (c *Client) writePump() {
 			}
 		case <-ticker.C:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			log.Println(c.user.Id)
 			if err := c.conn.WriteJSON(SendPing()); err != nil {
 				log.Println(err)
 				return

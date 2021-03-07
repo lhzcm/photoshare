@@ -1,5 +1,5 @@
-@host = http://localhost:8080
-#@host = http://www.onlinemusic.top:8080
+#@host = http://localhost:8080
+@host = http://www.onlinemusic.top:8080
 
 ###注册接口
 POST {{host}}/user HTTP/1.1
@@ -20,7 +20,7 @@ Cookie: token=1023-5ca282a436d0c87e532fbc9a3e8e737f-1608653320
 POST {{host}}/user/login HTTP/1.1
 
 {
-    "Id" : 1023,
+    "Id" : 1030,
     "Password" : "test123"
 }
 
@@ -122,7 +122,7 @@ Cookie: token=1030-7e986889eb843c11c0086413e90aee29-1614091521
 
 ###获取好友列表
 GET {{host}}/friend HTTP/1.1
-Cookie: token=1030-428a63b5a2affe4040d424271ebf76e6-1616724284
+Cookie: token=1030-ca5c6cb1d42ffe70629ced892bfac40d-1616724344
 
 ###删除好友
 DELETE  {{host}}/friend/1023 HTTP/1.1
