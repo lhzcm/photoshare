@@ -8,5 +8,5 @@ type RedisConnConfig struct {
 
 type RedisConfig struct {
 	User RedisConnConfig `yaml:"user"`
-	SMS  RedisConnConfig `yaml:"sms"`
+	Msg  RedisConnConfig `yaml:"msg"`
 }

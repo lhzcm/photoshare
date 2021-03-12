@@ -14,11 +14,11 @@ mssql:
 
 #redis配置
 redis:
-  user:
+  user: #用户信息缓存
     address: "112.74.48.21:6379"
     dbnum: 0
     password: ""
-  sms:
+  msg: #聊天消息缓存
     address: "112.74.48.21:6379"
     dbnum: 1
     password: ""

@@ -1,5 +1,7 @@
 package websocket
 
+import "log"
+
 type Hub struct {
 	clients    map[int32]*Client //在线客户端列表
 	register   chan *Client      //注册客户端
@@ -21,6 +23,7 @@ func Start() {
 			MainHub.clients[client.user.Id] = client
 		case client := <-MainHub.unregister:
 			if _, ok := MainHub.clients[client.user.Id]; ok {
+				log.Printf("客户端又关闭： %#v  %v \n", MainHub.clients, client.user.Id)
 				delete(MainHub.clients, client.user.Id)
 				close(client.send)
 			}

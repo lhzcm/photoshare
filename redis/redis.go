@@ -14,18 +14,7 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
-const (
-	address  = "127.0.0.1:6379"
-	password = ""
-)
-
-const (
-	userdb   = 0
-	cookiedb = 1
-	smsdb    = 2
-)
-
-var userRDB, smsRDB *redis.Client
+var userRDB, msgRDB *redis.Client
 var ctx = context.Background()
 
 func init() {
@@ -36,9 +25,9 @@ func init() {
 		Password: dbconfig.Password,
 		DB:       dbconfig.Dbnum,
 	})
-	//短信redis库
-	dbconfig = config.Configs.Redis.SMS
-	smsRDB = redis.NewClient(&redis.Options{
+	//用户聊天消息redis库
+	dbconfig = config.Configs.Redis.Msg
+	msgRDB = redis.NewClient(&redis.Options{
 		Addr:     dbconfig.Address,
 		Password: dbconfig.Password,
 		DB:       dbconfig.Dbnum,
@@ -47,11 +36,12 @@ func init() {
 	if err := userRDB.Ping(ctx).Err(); err != nil {
 		log.Fatalln(err.Error())
 	}
-	if err := smsRDB.Ping(ctx).Err(); err != nil {
+	if err := msgRDB.Ping(ctx).Err(); err != nil {
 		log.Fatalln(err.Error())
 	}
 }
 
+//获取用户缓存
 func Redisgetuser(Id int32) (user models.User, err error) {
 	var val map[string]string
 	if val, err = userRDB.HGetAll(ctx, strconv.Itoa(int(Id))).Result(); err != nil {
@@ -83,6 +73,7 @@ func Redisgetuser(Id int32) (user models.User, err error) {
 	return
 }
 
+//用户信息缓存
 func Redissetuser(user models.User) (err error) {
 	err = userRDB.HMSet(ctx, strconv.Itoa(int(user.Id)),
 		"Id", user.Id,
@@ -104,6 +95,7 @@ func Redissetuser(user models.User) (err error) {
 	return
 }
 
+//token缓存
 func RedissetToken(id int32, token string) (err error) {
 	err = userRDB.HMSet(ctx, strconv.FormatInt(int64(id), 10),
 		"Token", token).Err()
@@ -111,4 +103,15 @@ func RedissetToken(id int32, token string) (err error) {
 		return
 	}
 	return
+}
+
+//聊天消息缓存
+func RedisAddMsg(receiverid int32, msg []byte) (err error) {
+	return msgRDB.LPush(ctx, strconv.Itoa(int(receiverid)), msg).Err()
+}
+
+//获取聊天信息缓存
+func RedisGetMsg(receiverid int32) ([]byte, error) {
+	str, err := msgRDB.RPop(ctx, strconv.Itoa(int(receiverid))).Result()
+	return []byte(str), err
 }

@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"photoshare/models"
+	"photoshare/redis"
 	"photoshare/service"
 	"strings"
 	"time"
@@ -43,9 +44,8 @@ type Client struct {
 
 //向用户发送消息
 func (c *Client) Send(userid int32, msg Result) error {
-	msgbyte, _ := json.Marshal(msg)
 	if client, ok := c.hub.clients[userid]; ok {
-
+		msgbyte, _ := json.Marshal(msg)
 		select {
 		case client.send <- msgbyte:
 		default:
@@ -53,8 +53,10 @@ func (c *Client) Send(userid int32, msg Result) error {
 			close(client.send)
 			return errors.New("客户端没有响应")
 		}
+		return nil
+	} else {
+		return errors.New("当前用户不在线")
 	}
-	return errors.New("当前用户不在线")
 }
 
 //向客户端发送消息
@@ -71,30 +73,46 @@ func (c *Client) writePump() {
 		case message, ok := <-c.send:
 			if !ok {
 				c.conn.WriteJSON(CloseConnection())
+				log.Println("send channel has close")
 				return
 			}
 
-			w, err := c.conn.NextWriter(ws.TextMessage)
-			if err != nil {
+			if err := c.conn.WriteMessage(ws.TextMessage, message); err != nil {
+				log.Println("WriteMessage error")
+				log.Println(err.Error())
 				return
 			}
-
-			w.Write(message)
-			n := len(c.send)
-			for i := 0; i < n; i++ {
-				w.Write(newline)
-				w.Write(<-c.send)
+			for len(c.send) > 0 {
+				if err := c.conn.WriteMessage(ws.TextMessage, <-c.send); err != nil {
+					log.Println("WriteMessage error")
+					log.Println(err.Error())
+					return
+				}
 			}
 
-			//关闭消息写入
-			if err := w.Close(); err != nil {
-				log.Println(err)
-				return
-			}
+			// w, err := c.conn.NextWriter(ws.TextMessage)
+			// if err != nil {
+			// 	log.Println("nextwriter create fail")
+			// 	log.Panicln(err.Error())
+			// 	return
+			// }
+
+			// w.Write(message)
+			// n := len(c.send)
+			// for i := 0; i < n; i++ {
+			// 	w.Write(newline)
+			// 	w.Write(<-c.send)
+			// }
+
+			// //关闭消息写入
+			// if err := w.Close(); err != nil {
+			// 	log.Printf("close error")
+			// 	log.Println(err)
+			// 	return
+			// }
 		case <-ticker.C:
-			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
-			log.Println(c.user.Id)
-			if err := c.conn.WriteJSON(SendPing()); err != nil {
+			//c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if err := c.conn.WriteMessage(ws.PingMessage, nil); err != nil {
 				log.Println(err)
 				return
 			}
@@ -110,8 +128,8 @@ func (c *Client) readPump() {
 	}()
 	c.conn.SetReadLimit(maxMsgSize)
 	//c.conn.SetReadDeadline(time.Now().Add(pongWait))
-	// c.conn.SetPongHandler(func(msg string) error {
-	// 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
+	//c.conn.SetPongHandler(func(msg string) error {
+	//	c.conn.SetReadDeadline(time.Now().Add(pongWait))
 	// 	return nil
 	// })
 	for {
@@ -133,7 +151,7 @@ func (c *Client) readPump() {
 func (c *Client) MessageDeal(msg string) {
 	var result Result
 	if err := json.Unmarshal([]byte(msg), &result); err != nil {
-		//TODO
+		c.Send(c.user.Id, SendMessageErr("消息解析错误"))
 		return
 	}
 
@@ -155,7 +173,12 @@ func (c *Client) MessageDeal(msg string) {
 		}
 
 		//发送给在线用户
-		c.Send(msg.Receiverid, SendMessage(&msg))
+		msgResult := SendMessage(&msg)
+		if err := c.Send(msg.Receiverid, msgResult); err != nil {
+			//用户不在线缓存到redis
+			bytemsg, _ := json.Marshal(msgResult)
+			redis.RedisAddMsg(msg.Receiverid, bytemsg)
+		}
 	}
 	//else TODO
 
@@ -174,4 +197,9 @@ func StartClient(w http.ResponseWriter, r *http.Request, user *models.User) {
 
 	go client.writePump()
 	go client.readPump()
+
+	//读取redis缓存的消息
+	for msg, err := redis.RedisGetMsg(client.user.Id); err == nil && msg != nil; {
+		client.send <- msg
+	}
 }
