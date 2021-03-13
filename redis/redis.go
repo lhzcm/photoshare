@@ -112,6 +112,11 @@ func RedisAddMsg(receiverid int32, msg []byte) (err error) {
 
 //获取聊天信息缓存
 func RedisGetMsg(receiverid int32) ([]byte, error) {
-	str, err := msgRDB.RPop(ctx, strconv.Itoa(int(receiverid))).Result()
-	return []byte(str), err
+	str, err := msgRDB.RPop(ctx, strconv.Itoa(int(receiverid))).Bytes()
+	return str, err
+}
+
+//获取缓存聊天数
+func RedisGetMsgCount(receiverid int32) int64 {
+	return msgRDB.LLen(ctx, strconv.Itoa(int(receiverid))).Val()
 }

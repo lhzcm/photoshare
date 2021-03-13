@@ -9,7 +9,7 @@ import (
 
 //获取好友列表
 func FriendsList(userid int32) (friends []User, err error) {
-	query := db.GormDB.Raw("select u.id, u.name, u.headimg "+
+	query := db.GormDB.Raw("select u.id, u.name, u.headimg, f.notreadnums "+
 		"from "+Friend{}.TableName()+" as f join "+User{}.TableName()+" as u "+
 		"on f.friendid = u.id where f.userid = ?", userid)
 

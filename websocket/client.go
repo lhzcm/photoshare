@@ -199,7 +199,11 @@ func StartClient(w http.ResponseWriter, r *http.Request, user *models.User) {
 	go client.readPump()
 
 	//读取redis缓存的消息
-	for msg, err := redis.RedisGetMsg(client.user.Id); err == nil && msg != nil; {
-		client.send <- msg
+	count := redis.RedisGetMsgCount(client.user.Id)
+	for i := int64(0); i < count; i++ {
+		msg, err := redis.RedisGetMsg(client.user.Id)
+		if err == nil && msg != nil {
+			client.send <- msg
+		}
 	}
 }
