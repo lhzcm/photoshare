@@ -23,7 +23,6 @@ func (router *Router) UserRouteRegister() {
 	router.GET("/user/callback", CallBackPhoneCode)
 	router.POST("/user", UserRegister)
 	router.POST("/user/login", UserLogin)
-	router.OPTIONS("/user/login", func(c *gin.Context) {})
 	router.GET("/user/info", middleware.UserValidate, UserInfo)
 }
 

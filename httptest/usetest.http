@@ -131,3 +131,11 @@ Cookie: token=1030-428a63b5a2affe4040d424271ebf76e6-1616724284
 ###连接websocket
 GET {{host}}/message/ws HTTP/1.1
 Cookie: token=1030-428a63b5a2affe4040d424271ebf76e6-1616724284
+
+
+###前端访问
+GET {{host}}/home/home.html HTTP/1.1
+Cookie: token=1030-428a63b5a2affe4040d424271ebf76e6-1616724284
+
+###跨域option检查
+OPTIONS  {{host}}/test/1232 HTTP/1.1

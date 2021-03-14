@@ -16,7 +16,7 @@ type User struct {
 	Updatetime  time.Time `gorm:"not null;type:datetime;default:getdate()"`
 	Writetime   time.Time `gorm:"not null;type:datetime;default:getdate()"`
 	Token       string    `gorm:"not null;type:varchar(128)"`
-	Notreadnums int       //好友未读消息
+	Notreadnums int       `gorm:"->"` //好友未读消息
 }
 
 //定义表名

@@ -1,6 +1,7 @@
 #服务器配置
 server:
   port: 9090
+  corshost: http://www.onlinemusic.top:5000
 #token加密密钥
 token:
   secret: "token_photoshare"

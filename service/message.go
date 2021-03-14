@@ -25,5 +25,15 @@ func SendMessage(msg *Message) error {
 func GetMessageList(userid int, senderid int, curid int) (msgs []models.Message, err error) {
 	err = db.GormDB.Where("((senderid = ? and receiverid = ?) or (senderid = ? and receiverid = ?)) and id < ?",
 		userid, senderid, senderid, userid, curid).Order("id desc").Limit(20).Find(&msgs).Error
+	//删除未读消息数
+	if curid == 1000000000 {
+		UpdateMessageNotreadnums(userid, senderid)
+	}
 	return
+}
+
+//更新未读消息数
+func UpdateMessageNotreadnums(userid int, friendid int) error {
+	return db.GormDB.Model(&Friend{}).Where("userid = ? and friendid = ? and notreadnums > 0",
+		userid, friendid).Update("notreadnums", 0).Error
 }

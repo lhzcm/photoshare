@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"photoshare/models"
-	"photoshare/redis"
 	"photoshare/service"
 	"strings"
 	"time"
@@ -174,14 +173,25 @@ func (c *Client) MessageDeal(msg string) {
 
 		//发送给在线用户
 		msgResult := SendMessage(&msg)
-		if err := c.Send(msg.Receiverid, msgResult); err != nil {
-			//用户不在线缓存到redis
-			bytemsg, _ := json.Marshal(msgResult)
-			redis.RedisAddMsg(msg.Receiverid, bytemsg)
+		//发送给接收者
+		c.Send(msg.Receiverid, msgResult)
+		//发送给发送者
+		c.Send(msg.Senderid, msgResult)
+
+		//（TODO暂时不加redis缓存消息）
+		//if err := c.Send(msg.Receiverid, msgResult); err != nil {
+		// 	//用户不在线缓存到redis
+		// 	bytemsg, _ := json.Marshal(msgResult)
+		// 	redis.RedisAddMsg(msg.Receiverid, bytemsg)
+		// }
+	} else if result.Code == 3 { //清除未读消息数量
+		log.Println(result)
+		data, ok := result.Data.(float64)
+		if ok {
+			service.UpdateMessageNotreadnums(int(c.user.Id), int(data))
 		}
 	}
 	//else TODO
-
 }
 
 //启用websocket客户端
@@ -198,12 +208,12 @@ func StartClient(w http.ResponseWriter, r *http.Request, user *models.User) {
 	go client.writePump()
 	go client.readPump()
 
-	//读取redis缓存的消息
-	count := redis.RedisGetMsgCount(client.user.Id)
-	for i := int64(0); i < count; i++ {
-		msg, err := redis.RedisGetMsg(client.user.Id)
-		if err == nil && msg != nil {
-			client.send <- msg
-		}
-	}
+	//读取redis缓存的消息(TODO暂时不把消息存进redis)
+	// count := redis.RedisGetMsgCount(client.user.Id)
+	// for i := int64(0); i < count; i++ {
+	// 	msg, err := redis.RedisGetMsg(client.user.Id)
+	// 	if err == nil && msg != nil {
+	// 		client.send <- msg
+	// 	}
+	// }
 }
