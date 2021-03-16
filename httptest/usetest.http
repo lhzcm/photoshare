@@ -29,12 +29,15 @@ GET {{host}}/user/info HTTP/1.1
 Cookie: token=1023-62b5ad48616eafe95ded17d23567230b-1616916452
 
 
-###获取注册码接口
-GET {{host}}/user/code HTTP/1.1
+###获取登录/注册码接口
+GET {{host}}/user/code/17854276053/1 HTTP/1.1
+
+###获取通过登录码验证登录
+GET {{host}}/user/login/17854276053/119 HTTP/1.1
 
 
 ###第三方回调注册码接口
-GET {{host}}/user/callback?mobile=17854276064&content=%78%69%6E%23%31%32%32%35 HTTP/1.1
+GET {{host}}/user/callback?mobile=17854276053&content=%78%69%6e%23%31%39%35 HTTP/1.1
 
 
 ###获取注册码信息接口

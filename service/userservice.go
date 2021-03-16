@@ -21,6 +21,18 @@ func GetUserInfoById(id int32) (user User, err error) {
 	return
 }
 
+//通过用户手机号获取用户信息
+func GetUserInfoByPhone(user *User) error {
+	if err := db.GormDB.Where("phone = ?", user.Phone).First(&user).Error; err != nil {
+		return err
+	}
+	user.Token = utility.GetTokenById(user.Id, time.Now().Add(time.Hour*24*30))
+	if _, err := redis.Redisgetuser(user.Id); err != nil {
+		redis.Redissetuser(*user)
+	}
+	return db.GormDB.Model(&User{Id: user.Id}).Update("token", user.Token).Error
+}
+
 //用户登录
 func UserLogin(id int32, password string) (user User, token string, err error) {
 	if user, err = GetUserInfoById(id); err != nil {
@@ -51,11 +63,28 @@ func UserRegister(user *User) error {
 	return nil
 }
 
-//创建注册码PhoneCode
-func CreatePhoneCode() (PhoneCode, error) {
-	phonecode := PhoneCode{Writetime: time.Now()}
-	err := db.GormDB.Create(&phonecode).Error
-	return phonecode, err
+//创建登录/注册验证码PhoneCode
+func CreatePhoneCode(phone string, types int) (PhoneCode, error) {
+	phonecode := PhoneCode{Phone: phone, Type: types}
+	//如果是登录判断该手机号是否注册
+	var count int64
+	db.GormDB.Model(&User{}).Where("phone = ?", phone).Count(&count)
+	if types == 0 && count <= 0 {
+		return phonecode, errors.New("该手机号还没有注册，请先去注册账号")
+	} else if types == 1 && count > 0 {
+		return phonecode, errors.New("该手机号已经注册，请登录！")
+	}
+	if err := db.GormDB.Create(&phonecode).Error; err != nil {
+		return phonecode, errors.New("生成验证码错误")
+	}
+	return phonecode, nil
+}
+
+//验证登录验证码
+func ValidatePhoneCode(phone string, code int, types int) (PhoneCode, error) {
+	var photoCode PhoneCode
+	return photoCode,
+		db.GormDB.Where("id = ? and phone = ? and type = ? and expire >= getdate()", code, phone, types).First(&photoCode).Error
 }
 
 //获取注册码详情
@@ -66,7 +95,7 @@ func GetPhoneCode(id int32) (p PhoneCode, err error) {
 
 //更新PoneCode
 func UpdatePhoneCode(id int32, phone string) (int64, error) {
-	dbexec := db.GormDB.Model(&PhoneCode{}).Where("id = ?", id).Where("phone is null").
-		Updates(PhoneCode{Phone: phone, Updatetime: time.Now()})
+	dbexec := db.GormDB.Model(&PhoneCode{}).Where("id = ? and phone = ? and status = 0 and expire >= getdate()", id, phone).
+		Updates(PhoneCode{Status: 1, Updatetime: time.Now()})
 	return dbexec.RowsAffected, dbexec.Error
 }
