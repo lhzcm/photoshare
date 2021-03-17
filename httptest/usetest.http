@@ -9,7 +9,7 @@ Cookie: token=1023-5ca282a436d0c87e532fbc9a3e8e737f-1608653320
 {
     "Name" : "临时工",
     "Headimg" : "",
-    "Phone" : "17854276206",
+    "Phone" : "17854276203",
     "City" : 0,
     "Brithday" : "2020-11-11T00:00:00Z",
     "Ismale" : true,
@@ -30,12 +30,13 @@ Cookie: token=1023-62b5ad48616eafe95ded17d23567230b-1616916452
 
 
 ###获取登录/注册码接口
-GET {{host}}/user/code/17854276053/1 HTTP/1.1
+GET {{host}}/user/code/13411212112/1 HTTP/1.1
 
 ###获取通过登录码验证登录
 GET {{host}}/user/login/17854276053/119 HTTP/1.1
 
-
+###注册验证码
+GET {{host}}/user/register/13411212112/217 HTTP/1.1
 ###第三方回调注册码接口
 GET {{host}}/user/callback?mobile=17854276053&content=%78%69%6e%23%31%39%35 HTTP/1.1
 
