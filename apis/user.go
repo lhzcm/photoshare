@@ -98,7 +98,7 @@ func UserRegister(c *gin.Context) {
 		c.JSON(http.StatusOK, Fail(err.Error()))
 		return
 	}
-	if _, token, err := service.UserLogin(user.Id, user.Password); err == nil {
+	if _, token, err := service.UserLogin(user.Id, "", user.Password); err == nil {
 		c.SetCookie("token", token, 60*24*30, "/", c.Request.URL.Host, false, false)
 	}
 
@@ -115,7 +115,7 @@ func UserLogin(c *gin.Context) {
 		log.Println(err)
 		return
 	}
-	if user, token, err = service.UserLogin(user.Id, user.Password); err != nil {
+	if user, token, err = service.UserLogin(user.Id, user.Phone, user.Password); err != nil {
 		c.JSON(http.StatusOK, Fail(err.Error()))
 		return
 	}
@@ -223,7 +223,6 @@ func CallBackPhoneCode(c *gin.Context) {
 		result.ResultInfo = "param error"
 		xmlcontent, _ := xml.MarshalIndent(result, "", "    ")
 		xmlbytes := append(xmlhead, xmlcontent...)
-		//xmlbytes, _, _, _ = gogb2312.ConvertGB2312(xmlbytes)
 		c.String(http.StatusOK, string(xmlbytes))
 		return
 	}
@@ -233,7 +232,6 @@ func CallBackPhoneCode(c *gin.Context) {
 		result.ResultInfo = "code error"
 		xmlcontent, _ := xml.MarshalIndent(result, "", "    ")
 		xmlbytes := append(xmlhead, xmlcontent...)
-		//xmlbytes, _, _, _ = gogb2312.ConvertGB2312(xmlbytes)
 		c.String(http.StatusOK, string(xmlbytes))
 		return
 	}
@@ -242,8 +240,6 @@ func CallBackPhoneCode(c *gin.Context) {
 		result.ResultInfo = "phone error"
 		xmlcontent, _ := xml.MarshalIndent(result, "", "    ")
 		xmlbytes := append(xmlhead, xmlcontent...)
-		//xmlbytes, _, _, _ = gogb2312.ConvertGB2312(xmlbytes)
-		//c.XML(http.StatusOK, result)
 		c.String(http.StatusOK, string(xmlbytes))
 		return
 	}
@@ -253,8 +249,6 @@ func CallBackPhoneCode(c *gin.Context) {
 		result.ResultInfo = err.Error()
 		xmlcontent, _ := xml.MarshalIndent(result, "", "    ")
 		xmlbytes := append(xmlhead, xmlcontent...)
-		//xmlbytes, _, _, _ = gogb2312.ConvertGB2312(xmlbytes)
-		//c.XML(http.StatusOK, result)
 		c.String(http.StatusOK, string(xmlbytes))
 		return
 	}
@@ -262,8 +256,6 @@ func CallBackPhoneCode(c *gin.Context) {
 		result.ResultInfo = "update error"
 		xmlcontent, _ := xml.MarshalIndent(result, "", "    ")
 		xmlbytes := append(xmlhead, xmlcontent...)
-		//xmlbytes, _, _, _ = gogb2312.ConvertGB2312(xmlbytes)
-		//c.XML(http.StatusOK, result)
 		c.String(http.StatusOK, string(xmlbytes))
 		return
 	}
@@ -272,8 +264,6 @@ func CallBackPhoneCode(c *gin.Context) {
 	result.ResultInfo = "success"
 	xmlcontent, _ := xml.MarshalIndent(result, "", "    ")
 	xmlbytes := append(xmlhead, xmlcontent...)
-	//xmlbytes, _, _, _ = gogb2312.ConvertGB2312(xmlbytes)
-	//c.XML(http.StatusOK, result)
 	c.String(http.StatusOK, string(xmlbytes))
 	return
 }

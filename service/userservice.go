@@ -34,9 +34,16 @@ func GetUserInfoByPhone(user *User) error {
 }
 
 //用户登录
-func UserLogin(id int32, password string) (user User, token string, err error) {
-	if user, err = GetUserInfoById(id); err != nil {
-		return user, "", errors.New("登录失败，账号有误")
+func UserLogin(id int32, phone string, password string) (user User, token string, err error) {
+	if id <= 0 {
+		user.Phone = phone
+		if err = GetUserInfoByPhone(&user); err != nil {
+			return user, "", errors.New("登录失败，账号有误")
+		}
+	} else {
+		if user, err = GetUserInfoById(id); err != nil {
+			return user, "", errors.New("登录失败，账号有误")
+		}
 	}
 	if user.Password != utility.EncryptPassword(password) {
 		return user, "", errors.New("密码错误")
