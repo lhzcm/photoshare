@@ -1,6 +1,7 @@
 package apis
 
 import (
+	"net/http"
 	"photoshare/config"
 
 	"github.com/gin-gonic/gin"
@@ -22,7 +23,7 @@ func RouteRegister(e *gin.Engine) {
 	//router.HomeRouteRegister()
 
 	//静态文件
-	//router.StaticFS("/home", http.Dir("./httptest"))
+	router.StaticFS("/static/image", http.Dir(config.Configs.Static.PublishImgPath))
 }
 
 //跨域设置
