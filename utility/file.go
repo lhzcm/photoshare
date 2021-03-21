@@ -28,11 +28,12 @@ func GetFileExtend(name string) string {
 func ValidateImgName(name string) bool {
 	imgextend := GetFileExtend(name)
 	imgstrs := strings.Split(name, ".")
+
 	if len(imgstrs) < 2 {
 		return false
 	}
 	for _, item := range imgtypes {
-		if item == imgextend {
+		if item == strings.ToLower(imgextend) {
 			return true
 		}
 	}
