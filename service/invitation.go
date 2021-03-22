@@ -63,7 +63,18 @@ func InviteList(userid int32, status int16, page int, pagesize int) (invitation 
 	if err != nil {
 		return
 	}
-	err = db.GormDB.Where("invitedid = ?", userid).Where("status = ?", status).
-		Order("id desc").Offset((page - 1) * pagesize).Limit(pagesize).Find(&invitation).Error
+
+	query := db.GormDB.Raw("select i.*,u.headimg, u.name from "+Invitation{}.TableName()+
+		" i join "+User{}.TableName()+" u on i.userid = u.id where i.invitedid = ? and status = ?"+
+		" order by i.id desc offset ? rows fetch next ? rows only", userid, status, (page-1)*pagesize, pagesize)
+	if query.Error != nil {
+		err = query.Error
+		return
+	}
+
+	err = query.Scan(&invitation).Error
+
+	// err = db.GormDB.Where("invitedid = ?", userid).Where("status = ?", status).
+	// 	Order("id desc").Offset((page - 1) * pagesize).Limit(pagesize).Find(&invitation).Error
 	return
 }

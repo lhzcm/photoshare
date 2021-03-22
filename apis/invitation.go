@@ -32,7 +32,7 @@ func Invite(c *gin.Context) {
 		c.JSON(http.StatusOK, Fail(err.Error()))
 		return
 	}
-	c.JSON(http.StatusOK, Success(invitation, "邀请发送成功"))
+	c.JSON(http.StatusOK, Success("邀请发送成功", "请求成功"))
 	return
 }
 

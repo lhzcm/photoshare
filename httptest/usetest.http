@@ -113,7 +113,7 @@ Cookie: token=1023-8141b927404f2288e06b7612a5ab38fc-1611570133
 
 ###获取邀请列表
 GET {{host}}/invite/1/10/0 HTTP/1.1
-Cookie: token=1030-7e986889eb843c11c0086413e90aee29-1614091521
+Cookie: token=1036-294df2abe23dc61f6de3f85cb7923579-1618992283
 
 ###接受好友邀请
 PATCH {{host}}/invite HTTP/1.1
@@ -123,6 +123,10 @@ Cookie: token=1030-7e986889eb843c11c0086413e90aee29-1614091521
     "status" : 3,
     "id" : 1
 }
+
+###用户查找用户
+GET {{host}}/friend/search/15807531515 HTTP/1.1
+Cookie: token=1030-ca5c6cb1d42ffe70629ced892bfac40d-1616724344
 
 ###获取好友列表
 GET {{host}}/friend HTTP/1.1
