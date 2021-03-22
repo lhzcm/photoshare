@@ -63,6 +63,7 @@ func UserInfoById(c *gin.Context) {
 //用户注册添加
 func UserRegister(c *gin.Context) {
 	var user User
+	var password string
 
 	if err := c.BindJSON(&user); err != nil {
 		c.JSON(http.StatusOK, Fail("提交的参数有误"))
@@ -92,13 +93,14 @@ func UserRegister(c *gin.Context) {
 		return
 	}
 
+	password = user.Password
 	user.Password = utility.EncryptPassword(user.Password)
 
 	if err := service.UserRegister(&user); err != nil {
 		c.JSON(http.StatusOK, Fail(err.Error()))
 		return
 	}
-	if _, token, err := service.UserLogin(user.Id, "", user.Password); err == nil {
+	if _, token, err := service.UserLogin(user.Id, "", password); err == nil {
 		c.SetCookie("token", token, 60*24*30, "/", c.Request.URL.Host, false, false)
 	}
 
