@@ -28,6 +28,11 @@ func Invite(c *gin.Context) {
 	invitation.Userid = user.Id
 	invitation.Status = 0
 
+	if invitation.Userid == invitation.Invitedid {
+		c.JSON(http.StatusOK, Fail("邀请失败，不能邀请自己"))
+		return
+	}
+
 	if err := service.Invite(&invitation); err != nil {
 		c.JSON(http.StatusOK, Fail(err.Error()))
 		return
