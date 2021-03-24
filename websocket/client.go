@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"photoshare/models"
+	"photoshare/redis"
 	"photoshare/service"
 	"strings"
 	"time"
@@ -76,39 +77,40 @@ func (c *Client) writePump() {
 				return
 			}
 
-			if err := c.conn.WriteMessage(ws.TextMessage, message); err != nil {
-				log.Println("WriteMessage error")
-				log.Println(err.Error())
+			// if err := c.conn.WriteMessage(ws.TextMessage, message); err != nil {
+			// 	log.Println("WriteMessage error")
+			// 	log.Println(err.Error())
+			// 	return
+			// }
+			// for len(c.send) > 0 {
+			// 	if err := c.conn.WriteMessage(ws.TextMessage, <-c.send); err != nil {
+			// 		log.Println("WriteMessage error")
+			// 		log.Println(err.Error())
+			// 		return
+			// 	}
+			// }
+
+			w, err := c.conn.NextWriter(ws.TextMessage)
+			if err != nil {
+				log.Println("nextwriter create fail")
+				log.Panicln(err.Error())
 				return
 			}
-			for len(c.send) > 0 {
-				if err := c.conn.WriteMessage(ws.TextMessage, <-c.send); err != nil {
-					log.Println("WriteMessage error")
-					log.Println(err.Error())
-					return
-				}
+
+			w.Write(message)
+			n := len(c.send)
+			for i := 0; i < n; i++ {
+				w.Write(newline)
+				w.Write(<-c.send)
 			}
 
-			// w, err := c.conn.NextWriter(ws.TextMessage)
-			// if err != nil {
-			// 	log.Println("nextwriter create fail")
-			// 	log.Panicln(err.Error())
-			// 	return
-			// }
+			//关闭消息写入
+			if err := w.Close(); err != nil {
+				log.Printf("close error")
+				log.Println(err)
+				return
+			}
 
-			// w.Write(message)
-			// n := len(c.send)
-			// for i := 0; i < n; i++ {
-			// 	w.Write(newline)
-			// 	w.Write(<-c.send)
-			// }
-
-			// //关闭消息写入
-			// if err := w.Close(); err != nil {
-			// 	log.Printf("close error")
-			// 	log.Println(err)
-			// 	return
-			// }
 		case <-ticker.C:
 			//c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := c.conn.WriteMessage(ws.PingMessage, nil); err != nil {
@@ -173,17 +175,17 @@ func (c *Client) MessageDeal(msg string) {
 
 		//发送给在线用户
 		msgResult := SendMessage(&msg)
-		//发送给接收者
-		c.Send(msg.Receiverid, msgResult)
+
 		//发送给发送者
 		c.Send(msg.Senderid, msgResult)
 
-		//（TODO暂时不加redis缓存消息）
-		//if err := c.Send(msg.Receiverid, msgResult); err != nil {
-		// 	//用户不在线缓存到redis
-		// 	bytemsg, _ := json.Marshal(msgResult)
-		// 	redis.RedisAddMsg(msg.Receiverid, bytemsg)
-		// }
+		//发送给接收者(接收者不在线加redis缓存消息)
+		if err := c.Send(msg.Receiverid, msgResult); err != nil {
+			//用户不在线缓存到redis(用户上线时可以及时收到消息)
+			msgResult.Code = 4
+			bytemsg, _ := json.Marshal(msgResult)
+			redis.RedisAddMsg(msg.Receiverid, bytemsg)
+		}
 	} else if result.Code == 3 { //清除未读消息数量
 		log.Println(result)
 		data, ok := result.Data.(float64)
@@ -208,12 +210,20 @@ func StartClient(w http.ResponseWriter, r *http.Request, user *models.User) {
 	go client.writePump()
 	go client.readPump()
 
-	//读取redis缓存的消息(TODO暂时不把消息存进redis)
-	// count := redis.RedisGetMsgCount(client.user.Id)
-	// for i := int64(0); i < count; i++ {
-	// 	msg, err := redis.RedisGetMsg(client.user.Id)
-	// 	if err == nil && msg != nil {
-	// 		client.send <- msg
-	// 	}
-	// }
+	//读取redis缓存的消息
+	count := redis.RedisGetMsgCount(client.user.Id)
+	for i := int64(0); i < count; i++ {
+		msg, err := redis.RedisGetMsg(client.user.Id)
+		if err != nil || msg == nil {
+			continue
+		}
+		msgResult := Result{}
+		if err = json.Unmarshal(msg, &msgResult); err != nil {
+			continue
+		}
+		err = client.Send(client.user.Id, msgResult)
+		if err != nil {
+			break
+		}
+	}
 }

@@ -23,7 +23,7 @@ func Start() {
 			MainHub.clients[client.user.Id] = client
 		case client := <-MainHub.unregister:
 			if _, ok := MainHub.clients[client.user.Id]; ok {
-				log.Printf("客户端又关闭： %#v  %v \n", MainHub.clients, client.user.Id)
+				log.Printf("客户端关闭： %#v  %v \n", MainHub.clients, client.user.Id)
 				delete(MainHub.clients, client.user.Id)
 				close(client.send)
 			}

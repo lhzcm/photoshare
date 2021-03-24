@@ -107,7 +107,11 @@ func RedissetToken(id int32, token string) (err error) {
 
 //聊天消息缓存
 func RedisAddMsg(receiverid int32, msg []byte) (err error) {
-	return msgRDB.LPush(ctx, strconv.Itoa(int(receiverid)), msg).Err()
+	key := strconv.Itoa(int(receiverid))
+	if err = msgRDB.LPush(ctx, key, msg).Err(); err != nil {
+		return
+	}
+	return msgRDB.Expire(ctx, key, time.Hour*24).Err()
 }
 
 //获取聊天信息缓存
