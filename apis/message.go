@@ -82,7 +82,7 @@ func UploadImg(c *gin.Context) {
 		return
 	}
 	fileName := utility.GetGUID().Hex() + "." + utility.GetFileExtend(file.Filename)
-	if err = c.SaveUploadedFile(file, "./images/uploadimg/"+fileName); err != nil {
+	if err = c.SaveUploadedFile(file, config.Configs.Static.MessageImgPath+fileName); err != nil {
 		c.JSON(http.StatusOK, Fail("上传失败"))
 		log.Println(err)
 		return

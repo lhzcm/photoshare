@@ -47,7 +47,7 @@ func ImageUpload(c *gin.Context) {
 	}
 	exif := utility.GetImgExif(content)
 	fileName := utility.GetGUID().Hex() + "." + utility.GetFileExtend(file.Filename)
-	if err = c.SaveUploadedFile(file, "./images/uploadimg/"+fileName); err != nil {
+	if err = c.SaveUploadedFile(file, config.Configs.Static.PublishImgPath+fileName); err != nil {
 		c.JSON(http.StatusOK, Fail("上传失败"))
 		log.Println(err)
 		return
@@ -135,18 +135,16 @@ func GetPublishList(c *gin.Context) {
 		return
 	}
 
-	var result map[string]interface{} = make(map[string]interface{}, 2)
 	user := GetUserInfo(c)
-
-	publishs, total, err := service.GetPublishList(int(user.Id), page, pagesize)
+	publishs, err := service.GetPublishList(int(user.Id), page, pagesize)
 	if err != nil {
 		c.JSON(http.StatusOK, Fail(err.Error()))
 		return
 	}
-	result["publishs"] = publishs
-	result["total"] = total
+	//result["publishs"] = publishs
+	//result["total"] = total
 
-	c.JSON(http.StatusOK, Success(result, "请求成功"))
+	c.JSON(http.StatusOK, Success(publishs, "请求成功"))
 }
 
 //用户点赞或者取消点赞

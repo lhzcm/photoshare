@@ -61,24 +61,22 @@ func DeletePublish(id int32, userid int32) error {
 }
 
 //获取用户动态列表
-func GetPublishList(userid int, page int, pagesize int) (publishs []Publish, total int64, err error) {
+func GetPublishList(userid int, page int, pagesize int) (publishs []Publish, err error) {
 	var photos []Photo
 
-	db.GormDB.Model(&Publish{}).Where("userid = ? and status = 0", userid).Count(&total)
-
-	if db.GormDB.Where("userid = ? and status = 0", userid).Offset((page-1)*pagesize).
+	if db.GormDB.Where("(userid = ?  or (userid in (select friendid from t_friend where userid = ?) and status > 0)) and status = 0", userid, userid).Offset((page-1)*pagesize).
 		Limit(pagesize).Order("id desc").Find(&publishs).Error != nil {
-		return publishs, total, errors.New("获取动态失败")
+		return publishs, errors.New("获取动态失败")
 	}
 
 	for i := 0; i < len(publishs); i++ {
 		if db.GormDB.Where("pid = ?", publishs[i].Id).Order("id").Find(&photos).Error != nil {
-			return publishs, total, errors.New("获取动态图片失败")
+			return publishs, errors.New("获取动态图片失败")
 		}
 		publishs[i].Photos = photos
 	}
 
-	return publishs, total, nil
+	return publishs, nil
 }
 
 //用户点赞

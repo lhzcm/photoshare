@@ -22,8 +22,10 @@ func RouteRegister(e *gin.Engine) {
 	router.MessageRouteRegister()
 	//router.HomeRouteRegister()
 
-	//静态文件
-	router.StaticFS("/static/image", http.Dir(config.Configs.Static.PublishImgPath))
+	//消息静态图片
+	router.StaticFS("/static/msgimg", http.Dir(config.Configs.Static.MessageImgPath))
+	//动态静态图片
+	router.StaticFS("/static/publishimg", http.Dir(config.Configs.Static.PublishImgPath))
 }
 
 //跨域设置
