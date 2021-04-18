@@ -73,6 +73,11 @@ func GetPublishList(userid int, page int, pagesize int) (publishs []Publish, err
 		if db.GormDB.Where("pid = ?", publishs[i].Id).Order("id").Find(&photos).Error != nil {
 			return publishs, errors.New("获取动态图片失败")
 		}
+		user, err := GetUserInfoById(int32(userid))
+		if err == nil {
+			publishs[i].Headimg = user.Headimg
+			publishs[i].Name = user.Name
+		}
 		publishs[i].Photos = photos
 	}
 

@@ -18,6 +18,8 @@ type Publish struct {
 	Dateflag  time.Time `gorm:"not null;type:date;default:getdate()"`
 	Writetime time.Time `gorm:"not null;default:getdate();type:datetime"`
 	Imgs      string    `gorm:"-"`
+	Headimg   string    `gorm:"-"`
+	Name      string    `gorm:"-"`
 	Photos    []Photo   `gorm:"-"`
 }
 
